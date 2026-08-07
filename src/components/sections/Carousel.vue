@@ -19,13 +19,31 @@ export default {
         Autoplay,
       ],
       // 选择要轮播的照片
-      image_paths: [
-        "./carousel/1.jpg",
-        "./carousel/2.jpg",
-        "./carousel/3.jpg",
-        "./carousel/4.jpg",
-        "./carousel/5.jpg",
-        "./carousel/6.jpg",
+      carousel_items: [
+        {
+          image: "./carousel/motor.png",
+          text: "A motorbike traveling along a mountain road."
+        },
+        {
+          image: "./carousel/fisherman.png",
+          text: "A fisherman sitting beside the river."
+        },
+        {
+          image: "./carousel/farm_field.png",
+          text: "A farmer working in a large field."
+        },
+        {
+          image: "./carousel/ducks.png",
+          text: "Several ducks swimming on the lake."
+        },
+        {
+          image: "./carousel/chef.png",
+          text: "A chef preparing food in the kitchen."
+        },
+        {
+          image: "./carousel/city.png",
+          text: "A city skyline with multiple buildings."
+        },
       ],
     }
   }
@@ -62,8 +80,16 @@ export default {
           pauseOnMouseEnter:true,
         }"
         >
-        <swiper-slide v-for="path in image_paths">
-          <el-image :src="path"/>
+        <swiper-slide 
+          v-for="(item,index) in carousel_items" 
+          :key="index"
+        >
+          <div class="carousel-item">
+            <el-image :src="item.image"/>
+            <p class="carousel-caption">
+              {{ item.text }}
+            </p>
+          </div>
         </swiper-slide>
       </swiper>
     </el-col>
@@ -71,11 +97,39 @@ export default {
 </template>
   
 <style>
-
 /* 设置Swiper风格 */
 .swiper {
   --swiper-theme-color: white;
+  width: 80%;
+  height: 450px;
 }
 
+.swiper-slide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.carousel-item {
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.carousel-item .el-image {
+  width: 100%;
+  height: 360px;
+  object-fit: contain;
+}
+
+.carousel-caption {
+  margin-top: 8px;
+  font-size: 16px;
+  color: #444;
+  text-align: center;
+  line-height: 1.4;
+}
 </style>
   

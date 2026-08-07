@@ -1,61 +1,31 @@
 <script>
 import Title from './sections/Title.vue'
-import Abstract from './sections/Abstract.vue'
-import Markdown from './sections/Markdown.vue'
+import Method from './sections/Method.vue'
 import BibTeX from './sections/BibTeX.vue'
-import Carousel from './sections/Carousel.vue'
-import Video from './sections/Video.vue'
-import ImageSlider from './sections/ImageSlider.vue'
-import ImageSliderInner from './sections/ImageSliderInner.vue'
-import ImageSelector from './sections/ImageSelector.vue'
-import Echart from './sections/Echart.vue'
-import Table from './sections/Table.vue'
-import Collapse from './sections/Collapse.vue'
-import SeletionForComparison from './sections/SeletionForComparison.vue'
-import Comment from './sections/Comment.vue'
-import Latex from './sections/Latex.vue'
-import Model3D from './sections/Model3D.vue'
-import GaussianSplats3D from './sections/GaussianSplats3D.vue'
+import Comparison from './sections/Comparison.vue'
+import Layouts from './sections/Layouts.vue'
+import Intro from './sections/Intro.vue'
+import Gallery from './sections/Gallery.vue'
 
 export default {
   components: {
     Title,
-    Abstract,
-    Markdown,
+    Intro,
+    Method,
     BibTeX,
-    Carousel,
-    Video,
-    ImageSlider,
-    ImageSliderInner,
-    ImageSelector,
-    Echart,
-    Collapse,
-    Table,
-    SeletionForComparison,
-    Comment,
-    Latex,
-    Model3D,
-    GaussianSplats3D
+    Comparison,
+    Layouts,
+    Gallery,
   }
 }
 </script>
 
 <template>
   <Title/>
-  <Carousel/>
-  <Video/>
-  <Abstract/>
-  <Markdown/>
-  <Latex/>
-  <Table/>
-  <Collapse/>
-  <Echart/>
-  <Model3D/>
-  <GaussianSplats3D/>
-  <SeletionForComparison/>
-  <ImageSliderInner/>
-  <ImageSlider/>
-  <ImageSelector/>
+  <Intro/>
+  <Method/>
+  <Comparison/>
+  <Layouts/>
+  <Gallery/>
   <BibTeX/>
-  <Comment/>
-</template>
+</template>`${import.meta.env.BASE_URL}

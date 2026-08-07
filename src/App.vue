@@ -1,154 +1,222 @@
-<script>
-
+<script setup lang="ts">
 import Header from './components/Header.vue'
 import Main from './components/Main.vue'
 import Footer from './components/Footer.vue'
-
-export default {
-  components: {
-    Header,
-    Main,
-    Footer,
-  }
-}
-
 </script>
 
 <template>
-    <div>
-      
-      <el-container>
-        <el-header><Header/></el-header>
-        <el-main><Main/></el-main>
-        <el-footer><Footer/></el-footer>
-      </el-container>
-      
-      <!-- 回到顶部 -->
-      <el-backtop :right="40" :bottom="80" />
-    </div>
+  <div class="app-page">
+
+    <el-container class="app-container">
+
+      <!-- Main Content -->
+      <el-main class="app-main">
+        <Main />
+      </el-main>
+
+
+    </el-container>
+
+    <!-- Back to top -->
+    <el-backtop
+      :right="40"
+      :bottom="80"
+      class="app-backtop"
+    />
+
+  </div>
 </template>
 
 <style>
+/* ============================================================
+   Global page background
+   ============================================================ */
 
-h1 {
-  font-family: "MyFont", Verdana, sans-serif;
-  letter-spacing: 2px;
-  font-size: 28px;
-  margin: 0px;
-  text-align: center;
+html,
+body,
+#app {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+
+  background: #fdfcfb;
 }
 
-h2, h3, h4, h5, h6 {
-  font-family: "MyFont", Verdana, sans-serif;
-  letter-spacing: 2px;
+
+/* ============================================================
+   Basic global reset
+   ============================================================ */
+
+html {
+  scroll-behavior: smooth;
 }
 
-.el-header {
-  padding: 0px;
+body {
+  min-width: 320px;
+
+  color: #222;
+
+  background: #fdfcfb;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.el-footer {
-  padding: 0px;
+
+/* ============================================================
+   Root page
+   ============================================================ */
+
+.app-page {
+  position: relative;
+
+  width: 100%;
+  min-height: 100vh;
+
+  overflow-x: hidden;
+
+  background:
+    linear-gradient(
+      180deg,
+      #fffefd 0%,
+      #fdfcfb 42%,
+      #fcfbfa 100%
+    );
 }
 
-p, li {
-  font-size: 16px;
-  line-height: 1.75rem;
+
+/* ============================================================
+   Element Plus container
+   ============================================================ */
+
+.app-container {
+  width: 100%;
+  min-height: 100vh;
+
+  background: transparent;
 }
 
-code {
-  font-family: 'Consolas', monospace;
-  border-radius: 5px;
-  padding: 2px 5px;
-  background: #f2f2f2;
-  color: black;
+
+/* ============================================================
+   Header
+   ============================================================ */
+
+.app-header {
+  width: 100%;
+
+  height: auto !important;
+
+  padding: 0 !important;
+
+  background: transparent;
 }
 
-pre {
-  border-radius: 5px;
-  padding: 10px;
-  background: #f2f2f2;
-  line-height: 1.4rem;
+
+/* ============================================================
+   Main
+   ============================================================ */
+
+.app-main {
+  width: 100%;
+
+  padding:
+    0
+    0
+    28px !important;
+
+  overflow: visible !important;
+
+  background: transparent;
 }
 
-pre:not(pre[id=bibtex]) {
-  overflow-x: auto;
+
+/* ============================================================
+   Footer
+   ============================================================ */
+
+.app-footer {
+  width: 100%;
+
+  height: auto !important;
+
+  padding: 0 !important;
+
+  background: transparent;
 }
 
-pre code {
-  font-size: 16px;
-  color: black;
-  border: none;
-  padding: 0px;
+
+/* ============================================================
+   Back-to-top button
+   ============================================================ */
+
+.app-backtop {
+  width: 42px !important;
+  height: 42px !important;
+
+  color: #6e5525 !important;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.94
+    ) !important;
+
+  border:
+    1px
+    solid
+    rgba(
+      226,
+      210,
+      177,
+      0.95
+    );
+
+  box-shadow:
+    0
+    4px
+    14px
+    rgba(
+      0,
+      0,
+      0,
+      0.08
+    ) !important;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
 }
 
-blockquote {
-  border-left: 5px solid #bcbcbc;
-  padding: 10px 20px 10px 20px;
-  margin: 0px;
-  background: #f6f6f6;
+.app-backtop:hover {
+  background: #fff5df !important;
+
+  box-shadow:
+    0
+    6px
+    18px
+    rgba(
+      0,
+      0,
+      0,
+      0.12
+    ) !important;
+
+  transform: translateY(-2px);
 }
 
-blockquote > p {
-  margin-block-start: 0.5em;
-  margin-block-end: 0.5em;
-}
 
-/* 链接颜色装饰 */
-a {
-  color: #3273dc;
-  text-decoration: none;
-}
+/* ============================================================
+   Responsive
+   ============================================================ */
 
-/* 鼠标焦点悬浮在链接上的颜色装饰 */
-a:hover {
-  color: #848484;
-  border-bottom: dotted;
-}
+@media (max-width: 767px) {
 
-p > img {
-  width: 80%;
-  display: block;
-  margin: 0 auto;
-  border-radius: 10px;
-  box-shadow: 1px 1px 4px 1px #afafaf;
-}
+  .app-main {
+    padding-bottom: 20px !important;
+  }
 
-table {
-  border-collapse: collapse;
-  width: max-content;
-  max-width: 100%;
-  margin: 0 auto;
-  display:block;
-  overflow-x:auto;
 }
-
-thead {
-  border-bottom-width: 1px;
-  border-top-width: 2px;
-  border-left-width: 0px;
-  border-right-width: 0px;
-  border-style: solid;
-  border-color: rgb(0 0 0);
-}
-
-tbody tr:last-child {
-  border-bottom-width: 2px;
-  border-top-width: 0px;
-  border-left-width: 0px;
-  border-right-width: 0px;
-  border-style: solid;
-  border-color: rgb(0 0 0);
-}
-
-th, td {
-    padding-left: 1rem;
-    padding-right: 1rem;
-}
-
-.katex-display {
-  overflow-x: auto;
-  overflow-y: hidden;
-}
-
 </style>
