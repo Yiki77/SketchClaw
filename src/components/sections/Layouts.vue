@@ -82,7 +82,7 @@ const allExamples: LayoutExample[] =
             _,
             imageIndex
           ) =>
-            `/layouts/${id}/${imageIndex + 1}.jpg`
+            `./layouts/${id}/${imageIndex + 1}.jpg`
         )
 
       }
