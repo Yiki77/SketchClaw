@@ -77,32 +77,32 @@ const exampleConfigs: RefineConfig[] = [
     title: 'Example 1',
     caption:
       'A dragon flying above a medieval castle.',
-    folder: '/refine/1',
-    draft: '/refine/1/draft.jpg'
+    folder: './refine/1',
+    draft: './refine/1/draft.jpg'
   },
   {
     id: 'refine2',
     title: 'Example 2',
     caption:
       'A small castle stands between two tall pine trees.',
-    folder: '/refine/2',
-    draft: '/refine/2/draft.jpg'
+    folder: './refine/2',
+    draft: './refine/2/draft.jpg'
   },
   {
     id: 'refine3',
     title: 'Example 3',
     caption:
       'A cat sits beside a window, with plants growing near the window.',
-    folder: '/refine/3',
-    draft: '/refine/3/draft.jpg'
+    folder: './refine/3',
+    draft: './refine/3/draft.jpg'
   },
   {
     id: 'refine4',
     title: 'Example 4',
     caption:
       'A fisherman sits on a rock mending his net, with a fish basket and oars beside him. Waves ripple across the sea, and another small boat can be seen in the distance.',
-    folder: '/refine/4',
-    draft: '/refine/4/draft.jpg'
+    folder: './refine/4',
+    draft: './refine/4/draft.jpg'
   }
 ]
 
