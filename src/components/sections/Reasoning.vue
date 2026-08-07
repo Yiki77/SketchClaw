@@ -93,7 +93,7 @@ const exampleConfigs: ExampleConfig[] = [
       'A bakery displays fresh loaves in the window, with a counter of pastries inside, a large oven behind, flour sacks in the corner, and a sign hanging above the door.',
 
     folder:
-      '/layout_process/layout1'
+      './layout_process/layout1'
   },
 
 
@@ -106,7 +106,7 @@ const exampleConfigs: ExampleConfig[] = [
       'A giant robot walking through a city street.',
 
     folder:
-      '/layout_process/layout2'
+      './layout_process/layout2'
   },
 
 
@@ -119,7 +119,7 @@ const exampleConfigs: ExampleConfig[] = [
       'A painter stands before an easel. A paint box lies on the ground, with several brushes inside it.',
 
     folder:
-      '/layout_process/layout3'
+      './layout_process/layout3'
   },
 
 
@@ -132,7 +132,7 @@ const exampleConfigs: ExampleConfig[] = [
       'A street vendor stands behind a food cart. A parasol shades the cart, with two trash bins beside it.',
 
     folder:
-      '/layout_process/layout4'
+      './layout_process/layout4'
   },
 
 
@@ -145,7 +145,7 @@ const exampleConfigs: ExampleConfig[] = [
       'A taxi is parked beside a fire hydrant. A mailbox stands on the sidewalk nearby.',
 
     folder:
-      '/layout_process/layout5'
+      './layout_process/layout5'
   }
 
 ]
