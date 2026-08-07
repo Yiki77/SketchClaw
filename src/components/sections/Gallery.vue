@@ -76,11 +76,11 @@ const getExampleNumber = (example: GalleryExample) => {
 }
 
 const getDetailImage = (example: GalleryExample) => {
-  return `/carousel/${example.id}-${example.slug}.jpg`
+  return `./carousel/${example.id}-${example.slug}.jpg`
 }
 
 const getDraftImage = (example: GalleryExample) => {
-  return `/carousel/${example.id}-${example.slug}_draft.jpg`
+  return `./carousel/${example.id}-${example.slug}_draft.jpg`
 }
 
 const getPreviewImages = (example: GalleryExample) => {
