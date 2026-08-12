@@ -68,87 +68,37 @@ interface SvgBounds {
 
 
 // ============================================================
-// Gallery data
+// Manifest + gallery state
 // ============================================================
 
-const galleryConfigs: GalleryConfig[] = [
+interface ManifestItem {
+  index: number
+  file: string
+  slug: string
+}
 
-  {
-    id: 'gallery-1',
+const galleryItems = reactive<GalleryItem[]>([])
 
-    title: 'Example 1',
+const pageLoading = reactive({
+  value: true,
+  error: ''
+})
 
-    caption:
-      'A chef in the kitchen.',
+const baseUrl = import.meta.env.BASE_URL
+const homeUrl = baseUrl
+const manifestUrl =
+  `${baseUrl}carousel/results-manifest.json`
 
-    svg:
-      './carousel/1-chef.svg',
+const promptsUrl =
+  `${baseUrl}more_results.txt`
 
-    draft:
-      './carousel/1-chef_draft.jpg'
-  },
+const resolveSvgUrl = (file: string) => {
 
+  return (
+    `${baseUrl}carousel/${encodeURIComponent(file)}`
+  )
 
-  {
-    id: 'gallery-2',
-
-    title: 'Example 2',
-
-    caption:
-      'A staggered city skyline of spires, domes, and clock towers; street trees and lampposts line the foreground, and flocks of birds fly in the sky.',
-
-    svg:
-      './carousel/2-city.svg',
-
-    draft:
-      './carousel/2-city_draft.jpg'
-  },
-
-
-  {
-    id: 'gallery-3',
-
-    title: 'Example 3',
-
-    caption:
-      'Four ducks are swimming in the pool.',
-
-    svg:
-      './carousel/3-ducks.svg',
-
-    draft:
-      './carousel/3-ducks_draft.jpg'
-  }
-
-]
-
-
-// ============================================================
-// State
-// ============================================================
-
-const galleryItems = reactive<GalleryItem[]>(
-
-  galleryConfigs.map((config) => ({
-
-    ...config,
-
-    loading: true,
-
-    error: '',
-
-    svgMarkup: '',
-
-    objects: [],
-
-    selectedKey: null,
-
-    // Draft 默认展开
-    draftExpanded: true
-
-  }))
-
-)
+}
 
 
 // ============================================================
@@ -183,10 +133,6 @@ const DEFAULT_SVG_WIDTH = 780
 
 const DEFAULT_SVG_HEIGHT = 780
 
-
-// Separate More Results page. BASE_URL keeps GitHub Pages sub-paths working.
-const moreResultsUrl =
-  `${import.meta.env.BASE_URL}more-results.html`
 
 
 let stopActiveInteraction:
@@ -1955,34 +1901,25 @@ const getSelectedLabel = (
 // ============================================================
 
 const clientToParentPoint = (
-  parentElement: SVGGraphicsElement,
+  parentElement: SVGGraphicsElement | SVGSVGElement,
   clientX: number,
   clientY: number
 ) => {
 
+  // If the editable object is a direct child of the root <svg>,
+  // parentElement.ownerSVGElement is null. In that case the parent
+  // itself is the coordinate-system root and must be used directly.
   const svgElement =
-    parentElement.ownerSVGElement
+    parentElement instanceof SVGSVGElement
+      ? parentElement
+      : parentElement.ownerSVGElement
 
 
   if (!svgElement) {
 
-    return {
-      x: 0,
-      y: 0
-    }
+    return null
 
   }
-
-
-  const point =
-    svgElement.createSVGPoint()
-
-
-  point.x =
-    clientX
-
-  point.y =
-    clientY
 
 
   const screenMatrix =
@@ -1991,27 +1928,45 @@ const clientToParentPoint = (
 
   if (!screenMatrix) {
 
-    return {
-      x: 0,
-      y: 0
-    }
+    return null
 
   }
 
 
-  const localPoint =
-    point.matrixTransform(
-      screenMatrix.inverse()
-    )
+  try {
+
+    const point =
+      svgElement.createSVGPoint()
 
 
-  return {
+    point.x =
+      clientX
 
-    x:
-      localPoint.x,
+    point.y =
+      clientY
 
-    y:
-      localPoint.y
+
+    const localPoint =
+      point.matrixTransform(
+        screenMatrix.inverse()
+      )
+
+
+    return {
+
+      x:
+        localPoint.x,
+
+      y:
+        localPoint.y
+
+    }
+
+  } catch {
+
+    // A non-invertible SVG transform should not silently become (0, 0),
+    // otherwise dragging appears to be enabled but the object never moves.
+    return null
 
   }
 
@@ -2111,8 +2066,8 @@ const startObjectMove = (
   if (
     !parentElement
     || !(
-      parentElement
-      instanceof SVGGraphicsElement
+      parentElement instanceof SVGGraphicsElement
+      || parentElement instanceof SVGSVGElement
     )
   ) {
 
@@ -2143,6 +2098,13 @@ const startObjectMove = (
     )
 
 
+  if (!startPointer) {
+
+    return
+
+  }
+
+
   const startObjectX =
     object.x
 
@@ -2164,6 +2126,13 @@ const startObjectMove = (
         moveEvent.clientX,
         moveEvent.clientY
       )
+
+
+    if (!currentPointer) {
+
+      return
+
+    }
 
 
     object.x =
@@ -2613,18 +2582,128 @@ const loadGalleryItem = async (
 
 
 // ============================================================
-// Lifecycle
+// Manifest loading + lifecycle
 // ============================================================
+
+const loadManifest = async () => {
+
+  pageLoading.value = true
+  pageLoading.error = ''
+
+  try {
+
+    const [
+      manifestResponse,
+      promptsResponse
+    ] = await Promise.all([
+      fetch(
+        manifestUrl,
+        { cache: 'no-cache' }
+      ),
+      fetch(
+        promptsUrl,
+        { cache: 'no-cache' }
+      )
+    ])
+
+    if (!manifestResponse.ok) {
+
+      throw new Error(
+        `Unable to load the SVG manifest (${manifestResponse.status}).`
+      )
+
+    }
+
+    if (!promptsResponse.ok) {
+
+      throw new Error(
+        `Unable to load more_results.txt (${promptsResponse.status}).`
+      )
+
+    }
+
+    const manifest =
+      await manifestResponse.json() as ManifestItem[]
+
+    const promptText =
+      await promptsResponse.text()
+
+    // Keep line positions unchanged so line N always maps to result N.
+    const prompts =
+      promptText
+        .replace(/^\uFEFF/, '')
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+
+    if (!Array.isArray(manifest)) {
+
+      throw new Error(
+        'The SVG manifest has an invalid format.'
+      )
+
+    }
+
+    const orderedItems =
+      manifest
+        .filter((item) => {
+          return (
+            item.index >= 1
+            && item.index <= 42
+          )
+        })
+        .sort((a, b) => {
+          return a.index - b.index
+        })
+
+    galleryItems.splice(
+      0,
+      galleryItems.length,
+      ...orderedItems.map((manifestItem) => {
+
+        return {
+          id: `more-result-${manifestItem.index}`,
+          title: `Result ${manifestItem.index}`,
+          caption:
+            prompts[manifestItem.index - 1]
+            ?? '',
+          svg: resolveSvgUrl(manifestItem.file),
+          draft: '',
+          loading: true,
+          error: '',
+          svgMarkup: '',
+          objects: [],
+          selectedKey: null,
+          draftExpanded: false
+        } satisfies GalleryItem
+
+      })
+    )
+
+    pageLoading.value = false
+
+    galleryItems.forEach((item) => {
+
+      loadGalleryItem(item)
+
+    })
+
+  } catch (error) {
+
+    pageLoading.error =
+      error instanceof Error
+        ? error.message
+        : 'Failed to load more results.'
+
+    pageLoading.value = false
+
+  }
+
+}
+
 
 onMounted(() => {
 
-  galleryItems.forEach((item) => {
-
-    loadGalleryItem(
-      item
-    )
-
-  })
+  loadManifest()
 
 })
 
@@ -2637,15 +2716,9 @@ onBeforeUnmount(() => {
 
 </script>
 
-
 <template>
 
-  
-
-  <div class="gallery-section">
-
-    
-    <el-divider />
+  <main class="more-results-page">
 
     <el-row justify="center">
 
@@ -2657,46 +2730,26 @@ onBeforeUnmount(() => {
         :xl="12"
       >
 
-        <div class="sketchclaw-overview">
+        <header class="more-results-header">
 
-          <div
-            class="overview-kicker"
-            aria-hidden="true"
+          <a
+            class="back-link"
+            :href="homeUrl"
+            aria-label="Back to SketchClaw home page"
           >
-            <span class="overview-kicker-bar overview-kicker-orange" />
-            <span class="overview-kicker-bar overview-kicker-yellow" />
-            <span class="overview-kicker-bar overview-kicker-green" />
-            <span class="overview-kicker-bar overview-kicker-purple" />
-          </div>
+            <span aria-hidden="true">←</span>
+            <span>Back</span>
+          </a>
 
-          <h2 class="overview-title">
-            TL;DR: SketchClaw is an automatic agentic framework for text-guided
-            multi-concept scene sketch generation.
-          </h2>
+          <h1 class="more-results-title">
+            More Results
+          </h1>
 
-        </div>
-
-      </el-col>
-
-    </el-row>
-
-
-    <!-- Interactive examples -->
-
-    <el-row justify="center">
-
-      <el-col
-        :xs="24"
-        :sm="20"
-        :md="16"
-        :lg="12"
-        :xl="12"
-      >
-
-        <div class="gallery-interaction-row">
+          <p class="more-results-description">
+            Additional editable multi-concept scene sketches generated by SketchClaw.
+          </p>
 
           <p class="gallery-interaction-tip gallery-interaction-tip-top">
-
             <span
               class="gallery-interaction-icon"
               aria-hidden="true"
@@ -2708,120 +2761,89 @@ onBeforeUnmount(() => {
               Click and move any object below to explore different
               compositions and spark new ideas.
             </span>
-
           </p>
 
-          <a
-            class="more-results-button"
-            :href="moreResultsUrl"
-            aria-label="View more SketchClaw results"
-          >
-            <span>More results</span>
-            <span
-              class="more-results-arrow"
-              aria-hidden="true"
-            >
-              →
-            </span>
-          </a>
+        </header>
 
+
+        <div
+          v-if="pageLoading.value"
+          class="page-state"
+        >
+          Loading SVG results…
         </div>
 
-        <div class="gallery-grid">
 
+        <div
+          v-else-if="pageLoading.error"
+          class="page-state page-error"
+        >
+          {{ pageLoading.error }}
+        </div>
+
+
+        <div
+          v-else
+          class="gallery-grid"
+        >
 
           <article
-            v-for="(item, itemIndex) in galleryItems"
+            v-for="item in galleryItems"
             :key="item.id"
             class="gallery-item"
           >
 
-            <!-- Text below image -->
-
+            <!-- Prompt: line N in more_results.txt maps to result N -->
             <div class="gallery-info">
 
-
-              <div class="gallery-meta">
-
-
-                <span class="gallery-title">
-
-                  {{ item.title }}
-
-                </span>
-
-
-                <span class="gallery-index">
-
-                  {{
-                    String(itemIndex + 1)
-                      .padStart(2, '0')
-                  }}
-
-                </span>
-
-
-              </div>
-
-
               <el-tooltip
+                v-if="item.caption"
                 :content="item.caption"
                 placement="top"
                 effect="light"
                 :show-after="250"
                 :hide-after="0"
-                popper-class="
-                  intro-caption-tooltip
-                "
+                popper-class="intro-caption-tooltip"
               >
                 <p
                   class="gallery-caption"
                   tabindex="0"
                 >
-
                   “{{ item.caption }}”
-
                 </p>
               </el-tooltip>
 
+              <p
+                v-else
+                class="gallery-caption gallery-caption-empty"
+              >
+                Prompt unavailable
+              </p>
 
             </div>
-            <!-- Interactive card -->
 
             <div class="gallery-card">
 
-
               <div class="detail-stage">
-
-
-                <!-- Loading -->
 
                 <div
                   v-if="item.loading"
                   class="gallery-state"
                 >
-
                   <el-skeleton
                     animated
                     :rows="5"
                   />
-
                 </div>
 
-
-                <!-- Error -->
 
                 <div
                   v-else-if="item.error"
                   class="gallery-state gallery-error"
                 >
-
                   {{ item.error }}
-
                 </div>
 
-
-                <!-- Editable SVG -->
 
                 <div
                   v-else
@@ -2829,9 +2851,7 @@ onBeforeUnmount(() => {
                   :data-gallery-editor="item.id"
                   tabindex="0"
                   role="application"
-                  :aria-label="
-                    `${item.title} editable SVG scene`
-                  "
+                  :aria-label="`${item.title} editable SVG scene`"
                   v-html="item.svgMarkup"
                   @pointerdown="
                     startObjectMove(
@@ -2848,8 +2868,6 @@ onBeforeUnmount(() => {
                 />
 
 
-                <!-- Editable label -->
-
                 <span
                   v-if="
                     !item.loading
@@ -2857,107 +2875,11 @@ onBeforeUnmount(() => {
                   "
                   class="detail-label"
                 >
-
                   Editable SVG
-
                 </span>
-
-
-                <!-- ================================================== -->
-                <!-- Expanded Draft -->
-                <!-- ================================================== -->
-
-                <div
-                  v-if="item.draftExpanded"
-                  class="draft-preview"
-                  @pointerdown.stop
-                  @click.stop
-                >
-
-
-                  <div class="draft-preview-header">
-
-
-                    <span class="draft-preview-title">
-
-                      Draft
-
-                    </span>
-
-
-                    <button
-                      type="button"
-                      class="draft-close-button"
-                      aria-label="Collapse draft preview"
-                      title="Collapse draft preview"
-                      @click="
-                        collapseDraft(item)
-                      "
-                    >
-
-                      ×
-
-                    </button>
-
-
-                  </div>
-
-
-                  <div class="draft-preview-image-stage">
-
-                    <img
-                      :src="item.draft"
-                      :alt="
-                        `${item.title} initial draft`
-                      "
-                      class="draft-preview-image"
-                      loading="eager"
-                      draggable="false"
-                    />
-
-                  </div>
-
-
-                </div>
-
-
-                <!-- ================================================== -->
-                <!-- Collapsed Draft button -->
-                <!-- ================================================== -->
-
-                <button
-                  v-else
-                  type="button"
-                  class="draft-expand-button"
-                  aria-label="Show draft preview"
-                  title="Show draft preview"
-                  @pointerdown.stop
-                  @click.stop="
-                    expandDraft(item)
-                  "
-                >
-
-                  <span class="draft-expand-icon">
-
-                    ◫
-
-                  </span>
-
-
-                  <span>
-
-                    Draft
-
-                  </span>
-
-
-                </button>
-
 
               </div>
 
-
-              <!-- Toolbar -->
 
               <div
                 v-if="
@@ -2967,49 +2889,31 @@ onBeforeUnmount(() => {
                 class="object-toolbar"
               >
 
-
                 <div class="selection-info">
 
-
                   <span class="selection-label">
-
                     Selected
-
                   </span>
-
 
                   <span class="selection-name">
-
                     {{ getSelectedLabel(item) }}
-
                   </span>
-
 
                 </div>
 
 
                 <div class="toolbar-actions">
 
-
                   <el-button
                     circle
                     size="small"
                     title="Rotate left"
-                    :disabled="
-                      !getSelectedObject(item)
-                    "
-                    @click="
-                      rotateSelected(
-                        item,
-                        -15
-                      )
-                    "
+                    :disabled="!getSelectedObject(item)"
+                    @click="rotateSelected(item, -15)"
                   >
-
                     <el-icon>
                       <RefreshLeft />
                     </el-icon>
-
                   </el-button>
 
 
@@ -3017,21 +2921,12 @@ onBeforeUnmount(() => {
                     circle
                     size="small"
                     title="Rotate right"
-                    :disabled="
-                      !getSelectedObject(item)
-                    "
-                    @click="
-                      rotateSelected(
-                        item,
-                        15
-                      )
-                    "
+                    :disabled="!getSelectedObject(item)"
+                    @click="rotateSelected(item, 15)"
                   >
-
                     <el-icon>
                       <RefreshRight />
                     </el-icon>
-
                   </el-button>
 
 
@@ -3039,21 +2934,12 @@ onBeforeUnmount(() => {
                     circle
                     size="small"
                     title="Scale down"
-                    :disabled="
-                      !getSelectedObject(item)
-                    "
-                    @click="
-                      scaleSelected(
-                        item,
-                        -0.1
-                      )
-                    "
+                    :disabled="!getSelectedObject(item)"
+                    @click="scaleSelected(item, -0.1)"
                   >
-
                     <el-icon>
                       <ZoomOut />
                     </el-icon>
-
                   </el-button>
 
 
@@ -3061,21 +2947,12 @@ onBeforeUnmount(() => {
                     circle
                     size="small"
                     title="Scale up"
-                    :disabled="
-                      !getSelectedObject(item)
-                    "
-                    @click="
-                      scaleSelected(
-                        item,
-                        0.1
-                      )
-                    "
+                    :disabled="!getSelectedObject(item)"
+                    @click="scaleSelected(item, 0.1)"
                   >
-
                     <el-icon>
                       <ZoomIn />
                     </el-icon>
-
                   </el-button>
 
 
@@ -3085,18 +2962,12 @@ onBeforeUnmount(() => {
                     size="small"
                     type="danger"
                     title="Delete object"
-                    :disabled="
-                      !getSelectedObject(item)
-                    "
-                    @click="
-                      deleteSelected(item)
-                    "
+                    :disabled="!getSelectedObject(item)"
+                    @click="deleteSelected(item)"
                   >
-
                     <el-icon>
                       <Delete />
                     </el-icon>
-
                   </el-button>
 
 
@@ -3104,34 +2975,20 @@ onBeforeUnmount(() => {
                     circle
                     size="small"
                     title="Reset scene"
-                    @click="
-                      resetScene(item)
-                    "
+                    @click="resetScene(item)"
                   >
-
                     <el-icon>
                       <Refresh />
                     </el-icon>
-
                   </el-button>
-
 
                 </div>
 
-
               </div>
-
 
             </div>
 
-
-            
-
-
-
-
           </article>
-
 
         </div>
 
@@ -3139,14 +2996,80 @@ onBeforeUnmount(() => {
 
     </el-row>
 
-
-  </div>
+  </main>
 
 </template>
 
-
-
 <style scoped>
+
+:global(*) {
+  box-sizing: border-box;
+}
+
+:global(html),
+:global(body) {
+  margin: 0;
+  background: #fff;
+}
+
+.more-results-page {
+  width: 100%;
+  min-height: 100vh;
+  padding: 48px 16px 72px;
+  color: #242424;
+  background: #fff;
+}
+
+
+.more-results-header {
+  margin-bottom: 24px;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 24px;
+  color: #555;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  color: #222;
+}
+
+.more-results-title {
+  margin: 0 0 8px;
+  color: #222;
+  font-size: 32px;
+  font-weight: 750;
+  line-height: 1.2;
+}
+
+.more-results-description {
+  margin: 0 0 16px;
+  color: #444;
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.page-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 260px;
+  color: #555;
+  font-size: 15px;
+}
+
+.page-error {
+  color: #c7373d;
+}
+
+
 
 
 /* ============================================================
@@ -3601,7 +3524,7 @@ onBeforeUnmount(() => {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: stretch;
-  gap: 22px;
+  gap: 28px 22px;
   width: 100%;
   margin: 0 0 38px;
   box-sizing: border-box;
@@ -3635,7 +3558,7 @@ onBeforeUnmount(() => {
   flex-direction: column;
   width: 100%;
   height: auto;
-  margin-top: 12px;
+  margin: 0 0 12px;
   padding: 0 2px;
   box-sizing: border-box;
 }
@@ -3724,6 +3647,12 @@ onBeforeUnmount(() => {
   cursor: help;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
+}
+
+
+.gallery-caption-empty {
+  color: #8a8a8a;
+  cursor: default;
 }
 
 

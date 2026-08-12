@@ -93,7 +93,7 @@ const exampleConfigs: ExampleConfig[] = [
       'A bakery displays fresh loaves in the window, with a counter of pastries inside, a large oven behind, flour sacks in the corner, and a sign hanging above the door.',
 
     folder:
-      './layout_process/layout1'
+      '/layout_process/layout1'
   },
 
 
@@ -106,7 +106,7 @@ const exampleConfigs: ExampleConfig[] = [
       'A giant robot walking through a city street.',
 
     folder:
-      './layout_process/layout2'
+      '/layout_process/layout2'
   },
 
 
@@ -119,7 +119,7 @@ const exampleConfigs: ExampleConfig[] = [
       'A painter stands before an easel. A paint box lies on the ground, with several brushes inside it.',
 
     folder:
-      './layout_process/layout3'
+      '/layout_process/layout3'
   },
 
 
@@ -132,7 +132,7 @@ const exampleConfigs: ExampleConfig[] = [
       'A street vendor stands behind a food cart. A parasol shades the cart, with two trash bins beside it.',
 
     folder:
-      './layout_process/layout4'
+      '/layout_process/layout4'
   },
 
 
@@ -145,7 +145,7 @@ const exampleConfigs: ExampleConfig[] = [
       'A taxi is parked beside a fire hydrant. A mailbox stands on the sidewalk nearby.',
 
     folder:
-      './layout_process/layout5'
+      '/layout_process/layout5'
   }
 
 ]
@@ -913,6 +913,377 @@ onBeforeUnmount(() => {
       </el-col>
 
     </el-row>
+
+
+    <!-- ================================================== -->
+    <!-- Interactive reasoning carousel -->
+    <!-- ================================================== -->
+
+    <el-row justify="center">
+
+      <el-col
+        :xs="24"
+        :sm="20"
+        :md="16"
+        :lg="12"
+        :xl="12"
+      >
+
+        <div class="reasoning-carousel">
+
+
+          <!-- Previous example -->
+
+          <button
+            type="button"
+            class="example-arrow example-arrow-left"
+            aria-label="Previous example"
+            :disabled="examples.length <= 1"
+            @click="showPreviousExample"
+          >
+
+            <el-icon>
+              <ArrowLeft />
+            </el-icon>
+
+          </button>
+
+
+          <!-- ================================================== -->
+          <!-- Active example -->
+          <!-- ================================================== -->
+
+          <div class="example-wrapper">
+
+
+            <!-- Example counter -->
+
+            <div class="example-meta">
+
+              <span class="example-name">
+
+                {{ activeExample.title }}
+
+              </span>
+
+
+              <span class="example-counter">
+
+                {{
+                  String(activeExampleIndex + 1)
+                    .padStart(2, '0')
+                }}
+
+                /
+
+                {{
+                  String(examples.length)
+                    .padStart(2, '0')
+                }}
+
+              </span>
+
+            </div>
+
+
+            <!-- Scene caption -->
+
+            <p class="scene-caption">
+
+              “{{ activeExample.caption }}”
+
+            </p>
+
+
+            <!-- Loading -->
+
+            <div
+              v-if="activeExample.loading"
+              class="reasoning-card example-state"
+            >
+
+              <el-skeleton
+                animated
+                :rows="7"
+              />
+
+            </div>
+
+
+            <!-- Error -->
+
+            <div
+              v-else-if="activeExample.error"
+              class="reasoning-card example-state error-state"
+            >
+
+              <p>
+                {{ activeExample.error }}
+              </p>
+
+            </div>
+
+
+            <!-- Loaded example -->
+
+            <div
+              v-else
+              class="reasoning-card"
+            >
+
+
+              <!-- Main viewer -->
+
+              <div class="viewer-container">
+
+
+                <!-- ====================================== -->
+                <!-- Program panel -->
+                <!-- ====================================== -->
+
+                <div class="program-panel">
+
+
+                  <div class="program-title">
+
+                    Executable Program
+
+                  </div>
+
+
+                  <div
+                    :ref="
+                      (element) =>
+                        setProgramPanelRef(
+                          activeExample.id,
+                          element
+                        )
+                    "
+                    class="program-list"
+                  >
+
+
+                    <button
+                      v-for="(step, codeIndex) in activeExample.steps"
+                      :key="`${activeExample.id}-code-${codeIndex}`"
+                      type="button"
+                      :data-code-index="codeIndex"
+                      class="program-line"
+                      :class="{
+                        'program-line-active':
+                          codeIndex === activeExample.currentStep
+                      }"
+                      @click="
+                        selectStep(
+                          activeExample,
+                          codeIndex
+                        )
+                      "
+                    >
+
+
+                      <span class="program-index">
+
+                        {{
+                          String(codeIndex + 1)
+                            .padStart(2, '0')
+                        }}
+
+                      </span>
+
+
+                      <code class="program-code">
+
+                        {{ step.code }}
+
+                      </code>
+
+
+                    </button>
+
+
+                  </div>
+
+                </div>
+
+
+                <!-- ====================================== -->
+                <!-- Rendered image -->
+                <!-- ====================================== -->
+
+                <div class="result-panel">
+
+
+                  <img
+                    v-if="getCurrentStep(activeExample)"
+                    :src="getCurrentStep(activeExample)?.image"
+                    :alt="
+                      `${activeExample.title}, step ${
+                        activeExample.currentStep + 1
+                      }`
+                    "
+                    class="result-image"
+                  />
+
+
+                </div>
+
+
+              </div>
+
+
+              <!-- ======================================== -->
+              <!-- Playback and progress -->
+              <!-- ======================================== -->
+
+              <div class="progress-container">
+
+
+                <div class="progress-info">
+
+
+                  <!-- Left side: play button and operation -->
+
+                  <div class="progress-left">
+
+
+                    <button
+                      type="button"
+                      class="reasoning-play-button"
+                      :class="{
+                        'reasoning-play-button-active':
+                          isPlaying
+                      }"
+                      :aria-label="
+                        isPlaying
+                          ? 'Pause reasoning playback'
+                          : 'Play reasoning process'
+                      "
+                      :title="
+                        isPlaying
+                          ? 'Pause'
+                          : 'Play'
+                      "
+                      @click="togglePlayback"
+                    >
+
+
+                      <span
+                        v-if="isPlaying"
+                        class="reasoning-pause-icon"
+                        aria-hidden="true"
+                      >
+
+                        Ⅱ
+
+                      </span>
+
+
+                      <span
+                        v-else
+                        class="reasoning-play-icon"
+                        aria-hidden="true"
+                      >
+
+                        ▶
+
+                      </span>
+
+
+                    </button>
+
+
+                    <span class="current-operation">
+
+                      {{
+                        getCurrentStep(activeExample)?.code
+                      }}
+
+                    </span>
+
+
+                  </div>
+
+
+                  <!-- Right side: step counter -->
+
+                  <span class="step-indicator">
+
+                    STEP
+
+                    {{
+                      String(activeExample.currentStep + 1)
+                        .padStart(2, '0')
+                    }}
+
+                    /
+
+                    {{
+                      String(activeExample.steps.length)
+                        .padStart(2, '0')
+                    }}
+
+                  </span>
+
+
+                </div>
+
+
+                <el-slider
+                  :model-value="activeExample.currentStep"
+                  :min="0"
+                  :max="
+                    Math.max(
+                      0,
+                      activeExample.steps.length - 1
+                    )
+                  "
+                  :step="1"
+                  :show-tooltip="false"
+                  class="reasoning-slider"
+                  @input="
+                    (value) =>
+                      handleStepChange(
+                        activeExample,
+                        value
+                      )
+                  "
+                />
+
+
+              </div>
+
+
+            </div>
+
+
+          </div>
+
+
+          <!-- Next example -->
+
+          <button
+            type="button"
+            class="example-arrow example-arrow-right"
+            aria-label="Next example"
+            :disabled="examples.length <= 1"
+            @click="showNextExample"
+          >
+
+            <el-icon>
+              <ArrowRight />
+            </el-icon>
+
+          </button>
+
+
+        </div>
+        
+
+      </el-col>
+
+    </el-row>
+
 
   </div>
 

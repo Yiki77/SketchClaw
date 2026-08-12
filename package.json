@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predev": "node scripts/generate-carousel-manifest.mjs",
+    "prebuild": "node scripts/generate-carousel-manifest.mjs"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",

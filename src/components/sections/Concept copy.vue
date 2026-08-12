@@ -50,48 +50,48 @@ const examples: ConceptExample[] = [
     caption:
       'A diver explores an underwater cave. Coral reefs cover the rocks, with schools of fish swimming overhead.',
 
-    folder: './concept/1',
+    folder: '/concept/1',
 
     assets: [
       {
         id: 'cave',
         name: 'Cave',
-        file: './concept/1/cave_bg.jpg'
+        file: '/concept/1/cave_bg.jpg'
       },
       {
         id: 'coral_re ef',
         name: 'Coral Reef',
-        file: './concept/1/coral_reef_bg.jpg'
+        file: '/concept/1/coral_reef_bg.jpg'
       },
       {
         id: 'diver',
         name: 'Diver',
-        file: './concept/1/diver_bg.jpg'
+        file: '/concept/1/diver_bg.jpg'
       },
       {
         id: 'fish_1',
         name: 'Fish 1',
-        file: './concept/1/fish_1_bg.jpg'
+        file: '/concept/1/fish_1_bg.jpg'
       },
       {
         id: 'fish_2',
         name: 'Fish 2',
-        file: './concept/1/fish_2_bg.jpg'
+        file: '/concept/1/fish_2_bg.jpg'
       },
       {
         id: 'fish_3',
         name: 'Fish 3',
-        file: './concept/1/fish_3_bg.jpg'
+        file: '/concept/1/fish_3_bg.jpg'
       },
       {
         id: 'fish_4',
         name: 'Fish 4',
-        file: './concept/1/fish_4_bg.jpg'
+        file: '/concept/1/fish_4_bg.jpg'
       },
       {
         id: 'rock_formation',
         name: 'Rock Formation',
-        file: './concept/1/rock_formation_bg.jpg'
+        file: '/concept/1/rock_formation_bg.jpg'
       }
     ]
   },
@@ -104,23 +104,23 @@ const examples: ConceptExample[] = [
     caption:
       'A dog sleeping next to a bowl.',
 
-    folder: './concept/2',
+    folder: '/concept/2',
 
     assets: [
       {
         id: 'bowl',
         name: 'Bowl',
-        file: './concept/2/bowl_bg.jpg'
+        file: '/concept/2/bowl_bg.jpg'
       },
       {
         id: 'dog',
         name: 'Sleeping Dog',
-        file: './concept/2/dog_bg.jpg'
+        file: '/concept/2/dog_bg.jpg'
       },
       {
         id: 'floor',
         name: 'Floor',
-        file: './concept/2/floor_bg.jpg'
+        file: '/concept/2/floor_bg.jpg'
       }
     ]
   },
@@ -133,38 +133,38 @@ const examples: ConceptExample[] = [
     caption:
       'A drone flies through a futuristic city. Hovering vehicles move between skyscrapers.',
 
-    folder: './concept/3',
+    folder: '/concept/3',
 
     assets: [
       {
         id: 'drone',
         name: 'Drone',
-        file: './concept/3/drone_bg.jpg'
+        file: '/concept/3/drone_bg.jpg'
       },
       {
         id: 'hovering_vehicle_1',
         name: 'Hovering Vehicle 1',
-        file: './concept/3/hovering_vehicle_1_bg.jpg'
+        file: '/concept/3/hovering_vehicle_1_bg.jpg'
       },
       {
         id: 'hovering_vehicle_2',
         name: 'Hovering Vehicle 2',
-        file: './concept/3/hovering_vehicle_2_bg.jpg'
+        file: '/concept/3/hovering_vehicle_2_bg.jpg'
       },
       {
         id: 'skyscraper_1',
         name: 'Skyscraper 1',
-        file: './concept/3/skyscraper_1_bg.jpg'
+        file: '/concept/3/skyscraper_1_bg.jpg'
       },
       {
         id: 'skyscraper_2',
         name: 'Skyscraper 2',
-        file: './concept/3/skyscraper_2_bg.jpg'
+        file: '/concept/3/skyscraper_2_bg.jpg'
       },
       {
         id: 'skyscraper_3',
         name: 'Skyscraper 3',
-        file: './concept/3/skyscraper_3_bg.jpg'
+        file: '/concept/3/skyscraper_3_bg.jpg'
       }
     ]
   }
@@ -277,11 +277,206 @@ const showNextExample = () => {
           represented as an individual SVG object.
           This step allows the subsequent reasoning process to organize,
           transform, and compose these assets separately on the canvas.
+
         </p>
 
       </el-col>
 
     </el-row>
+
+
+    <!-- ====================================================== -->
+    <!-- Interactive example -->
+    <!-- ====================================================== -->
+
+    <el-row justify="center">
+
+      <el-col
+        :xs="24"
+        :sm="20"
+        :md="16"
+        :lg="12"
+        :xl="12"
+      >
+
+        <div class="concept-carousel">
+
+
+          <!-- Previous example -->
+
+          <button
+            type="button"
+            class="example-arrow example-arrow-left"
+            aria-label="Previous concept example"
+            :disabled="examples.length <= 1"
+            @click="showPreviousExample"
+          >
+
+            <el-icon>
+              <ArrowLeft />
+            </el-icon>
+
+          </button>
+
+
+          <!-- Current example -->
+
+          <div class="example-wrapper">
+
+
+            <!-- Example title + progress -->
+
+            <div class="example-meta">
+
+              <span class="example-title">
+
+                {{ activeExample.title }}
+
+              </span>
+
+
+              <span class="example-counter">
+
+                {{
+                  String(
+                    activeExampleIndex + 1
+                  ).padStart(
+                    2,
+                    '0'
+                  )
+                }}
+
+                /
+
+                {{
+                  String(
+                    examples.length
+                  ).padStart(
+                    2,
+                    '0'
+                  )
+                }}
+
+              </span>
+
+            </div>
+
+
+            <!-- Scene caption -->
+
+            <p class="scene-caption">
+
+              “{{ activeExample.caption }}”
+
+            </p>
+
+
+            <!-- Asset card -->
+
+            <div class="concept-card">
+
+
+              <div class="asset-grid">
+
+
+                <div
+                  v-for="(
+                    asset,
+                    assetIndex
+                  ) in activeExample.assets"
+                  :key="
+                    `${activeExample.id}-${asset.id}`
+                  "
+                  class="asset-card"
+                >
+
+
+                  <!-- Asset index -->
+
+                  <div class="asset-index">
+
+                    {{
+                      String(
+                        assetIndex + 1
+                      ).padStart(
+                        2,
+                        '0'
+                      )
+                    }}
+
+                  </div>
+
+
+                  <!-- Asset image -->
+
+                  <div class="asset-image-wrapper">
+
+                    <img
+                      :src="asset.file"
+                      :alt="asset.name"
+                      class="asset-image"
+                      draggable="false"
+                    />
+
+                  </div>
+
+
+                  <!-- Asset name -->
+
+                  <div class="asset-name">
+
+                    {{ asset.name }}
+
+                  </div>
+
+
+                  <!-- Asset format -->
+
+                  <div class="asset-format">
+
+                    Independent SVG Asset
+
+                  </div>
+
+
+                </div>
+
+
+              </div>
+
+
+            </div>
+
+
+          </div>
+
+
+          <!-- Next example -->
+
+          <button
+            type="button"
+            class="example-arrow example-arrow-right"
+            aria-label="Next concept example"
+            :disabled="examples.length <= 1"
+            @click="showNextExample"
+          >
+
+            <el-icon>
+              <ArrowRight />
+            </el-icon>
+
+          </button>
+
+
+        </div>
+
+
+
+
+      </el-col>
+
+    </el-row>
+
 
   </div>
 

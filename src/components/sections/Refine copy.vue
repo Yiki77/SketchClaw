@@ -2,14 +2,14 @@
 
 import {
   computed,
-  onBeforeUnmount,
   onMounted,
-  reactive
+  reactive,
+  ref
 } from 'vue'
 
 import {
-  VideoPlay,
-  RefreshRight
+  ArrowLeft,
+  ArrowRight
 } from '@element-plus/icons-vue'
 
 
@@ -21,7 +21,6 @@ interface RefineProps {
   embedded?: boolean
   showTitle?: boolean
 }
-
 
 withDefaults(
   defineProps<RefineProps>(),
@@ -44,12 +43,9 @@ interface RefineConfig {
   draft: string
 }
 
-
 interface RefineExample extends RefineConfig {
   frames: string[]
-  currentImageIndex: number
   loading: boolean
-  playing: boolean
   error: string
 }
 
@@ -59,93 +55,55 @@ interface RefineExample extends RefineConfig {
 // ============================================================
 
 /*
-  每个文件夹：
+  每个文件夹的结构：
 
-  draft.png
-  1.png
-  2.png
-  3.png
+  draft.jpg
+  1.jpg
+  2.jpg
+  3.jpg
   ...
 
-  currentImageIndex:
+  当前版本：
 
-  0 代表 draft.png
-  1 代表 1.png
-  2 代表 2.png
-  ...
+  1. 页面一次只展示一个 Example。
+  2. 使用左右圆形箭头切换 Example。
+  3. 当前 Example 的 Draft 和全部 refinement frames 同时展开。
+  4. 不自动播放，也不使用横向或纵向滚动容器。
 */
 
 const exampleConfigs: RefineConfig[] = [
-
   {
     id: 'refine1',
-
     title: 'Example 1',
-
     caption:
       'A dragon flying above a medieval castle.',
-
     folder: '/refine/1',
-
-    draft: '/refine/1/draft.png'
+    draft: '/refine/1/draft.jpg'
   },
-
-
   {
     id: 'refine2',
-
     title: 'Example 2',
-
     caption:
       'A small castle stands between two tall pine trees.',
-
     folder: '/refine/2',
-
-    draft: '/refine/2/draft.png'
+    draft: '/refine/2/draft.jpg'
   },
-
-
   {
     id: 'refine3',
-
     title: 'Example 3',
-
     caption:
       'A cat sits beside a window, with plants growing near the window.',
-
     folder: '/refine/3',
-
-    draft: '/refine/3/draft.png'
+    draft: '/refine/3/draft.jpg'
   },
-
-
   {
     id: 'refine4',
-
     title: 'Example 4',
-
     caption:
       'A fisherman sits on a rock mending his net, with a fish basket and oars beside him. Waves ripple across the sea, and another small boat can be seen in the distance.',
-
     folder: '/refine/4',
-
-    draft: '/refine/4/draft.png'
-  },
-
-
-  {
-    id: 'refine5',
-
-    title: 'Example 5',
-
-    caption:
-      'Two stone lions stand on either side of the temple steps.',
-
-    folder: '/refine/5',
-
-    draft: '/refine/5/draft.png'
+    draft: '/refine/4/draft.jpg'
   }
-
 ]
 
 
@@ -154,105 +112,56 @@ const exampleConfigs: RefineConfig[] = [
 // ============================================================
 
 const examples = reactive<RefineExample[]>(
-
   exampleConfigs.map((config) => ({
-
     ...config,
-
     frames: [],
-
-    currentImageIndex: 0,
-
     loading: true,
-
-    playing: false,
-
     error: ''
-
   }))
-
 )
 
+const currentExampleIndex = ref(0)
+
+const currentExample = computed(() => {
+  return examples[currentExampleIndex.value]
+})
+
 
 // ============================================================
-// Animation settings
+// Frame settings
 // ============================================================
-
-// 最多自动检测多少张优化帧
 
 const MAX_FRAME_COUNT = 100
-
-
-// 每张优化帧显示时间
-
-const FRAME_DURATION = 600
-
-
-// 最后一张图停留时间
-
-const FINAL_FRAME_HOLD = 1000
-
-
-// 每个例子对应一个定时器
-
-const animationTimers =
-  new Map<string, number>()
 
 
 // ============================================================
 // Image preloading
 // ============================================================
 
-/*
-  不只是检测图像是否存在，也等待浏览器完成 decode。
-
-  这样图片开始播放时已经进入浏览器缓存并完成解码，
-  可以减少图像切换时的闪烁和空白。
-*/
-
 const preloadImage = (
   url: string
 ): Promise<boolean> => {
-
   return new Promise((resolve) => {
-
     const image = new Image()
 
-
     image.onload = async () => {
-
       try {
-
         if (typeof image.decode === 'function') {
-
           await image.decode()
-
         }
-
       } catch {
-
-        // 即使 decode 失败，只要 onload 成功，
-        // 仍然认为图片可以显示。
-
+        // decode 失败时，只要图片成功加载，仍然视为可显示。
       }
 
-
       resolve(true)
-
     }
-
 
     image.onerror = () => {
-
       resolve(false)
-
     }
 
-
     image.src = url
-
   })
-
 }
 
 
@@ -263,394 +172,144 @@ const preloadImage = (
 const loadExample = async (
   example: RefineExample
 ) => {
-
   example.loading = true
-
   example.error = ''
 
-
   try {
-
-    // 先加载 draft
-
     const draftExists =
-      await preloadImage(
-        example.draft
-      )
-
+      await preloadImage(example.draft)
 
     if (!draftExists) {
-
       throw new Error(
         `Unable to load ${example.draft}`
       )
-
     }
 
-
     const discoveredFrames: string[] = []
-
-
-    // 自动检测 1.png、2.png、3.png...
 
     for (
       let frameIndex = 1;
       frameIndex <= MAX_FRAME_COUNT;
       frameIndex += 1
     ) {
-
       const frameUrl =
-        `${example.folder}/${frameIndex}.png`
-
+        `${example.folder}/${frameIndex}.jpg`
 
       const frameExists =
         await preloadImage(frameUrl)
 
-
       if (!frameExists) {
-
         break
-
       }
 
-
-      discoveredFrames.push(
-        frameUrl
-      )
-
+      discoveredFrames.push(frameUrl)
     }
 
-
-    if (
-      discoveredFrames.length === 0
-    ) {
-
+    if (discoveredFrames.length === 0) {
       throw new Error(
         `No refinement frames were found in ${example.folder}.`
       )
-
     }
 
-
-    example.frames =
-      discoveredFrames
-
-    example.currentImageIndex = 0
-
+    example.frames = discoveredFrames
   } catch (error) {
-
     example.error =
       error instanceof Error
         ? error.message
         : 'Failed to load the refinement example.'
-
   } finally {
-
     example.loading = false
-
   }
-
 }
 
 
 // ============================================================
-// Displayed images
+// Example navigation
 // ============================================================
 
-/*
-  返回 draft + 所有 refinement frames。
+const previousExample = () => {
+  currentExampleIndex.value =
+    (
+      currentExampleIndex.value
+      - 1
+      + examples.length
+    )
+    % examples.length
+}
 
-  所有图片会同时存在于 DOM 中并重叠放置，
-  只是通过 opacity 决定哪一张显示。
-  这样不会在每次切换时重新创建 img 或切换网络资源。
-*/
+const nextExample = () => {
+  currentExampleIndex.value =
+    (
+      currentExampleIndex.value
+      + 1
+    )
+    % examples.length
+}
+
+const selectExample = (
+  exampleIndex: number
+) => {
+  currentExampleIndex.value = exampleIndex
+}
+
+const handleExampleKeydown = (
+  event: KeyboardEvent
+) => {
+  if (event.key === 'ArrowLeft') {
+    event.preventDefault()
+    previousExample()
+  }
+
+  if (event.key === 'ArrowRight') {
+    event.preventDefault()
+    nextExample()
+  }
+}
+
+
+// ============================================================
+// Sequence helpers
+// ============================================================
 
 const getAllImages = (
   example: RefineExample
 ) => {
-
   return [
     example.draft,
     ...example.frames
   ]
-
 }
 
-
-// ============================================================
-// Animation helpers
-// ============================================================
-
-const clearExampleTimer = (
-  exampleId: string
+const getFrameLabel = (
+  imageIndex: number,
+  totalImages: number
 ) => {
-
-  const timer =
-    animationTimers.get(exampleId)
-
-
-  if (timer !== undefined) {
-
-    window.clearTimeout(timer)
-
-    animationTimers.delete(
-      exampleId
-    )
-
-  }
-
-}
-
-
-const stopExample = (
-  example: RefineExample,
-  restoreDraft = true
-) => {
-
-  clearExampleTimer(
-    example.id
-  )
-
-
-  example.playing = false
-
-
-  if (restoreDraft) {
-
-    example.currentImageIndex = 0
-
-  }
-
-}
-
-
-const stopAllExamples = (
-  exceptExampleId?: string
-) => {
-
-  examples.forEach((example) => {
-
-    if (
-      example.id !== exceptExampleId
-    ) {
-
-      stopExample(
-        example,
-        true
-      )
-
-    }
-
-  })
-
-}
-
-
-// ============================================================
-// Play refinement
-// ============================================================
-
-const showAnimationFrame = (
-  example: RefineExample,
-  frameIndex: number
-) => {
-
-  /*
-    frameIndex 从 1 开始：
-
-    1 -> 1.png
-    2 -> 2.png
-    ...
-  */
-
-  example.currentImageIndex =
-    frameIndex
-
-
-  const isLastFrame =
-
-    frameIndex
-    >= example.frames.length
-
-
-  if (isLastFrame) {
-
-    // 最后一帧停留 1 秒后恢复 draft
-
-    const timer =
-      window.setTimeout(() => {
-
-        example.currentImageIndex = 0
-
-        example.playing = false
-
-
-        animationTimers.delete(
-          example.id
-        )
-
-      }, FINAL_FRAME_HOLD)
-
-
-    animationTimers.set(
-      example.id,
-      timer
-    )
-
-
-    return
-
-  }
-
-
-  // 播放下一帧
-
-  const timer =
-    window.setTimeout(() => {
-
-      showAnimationFrame(
-        example,
-        frameIndex + 1
-      )
-
-    }, FRAME_DURATION)
-
-
-  animationTimers.set(
-    example.id,
-    timer
-  )
-
-}
-
-
-const playExample = (
-  example: RefineExample
-) => {
-
-  if (
-    example.loading
-    || example.error
-    || example.frames.length === 0
-  ) {
-
-    return
-
-  }
-
-
-  // 正在播放时再次点击，则回到 draft
-
-  if (example.playing) {
-
-    stopExample(
-      example,
-      true
-    )
-
-    return
-
-  }
-
-
-  // 只允许一个例子同时播放
-
-  stopAllExamples(
-    example.id
-  )
-
-
-  clearExampleTimer(
-    example.id
-  )
-
-
-  example.currentImageIndex = 0
-
-  example.playing = true
-
-
-  // 立即显示第一张优化帧
-
-  showAnimationFrame(
-    example,
-    1
-  )
-
-}
-
-
-// ============================================================
-// Keyboard access
-// ============================================================
-
-const handleCardKeydown = (
-  event: KeyboardEvent,
-  example: RefineExample
-) => {
-
-  if (
-    event.key === 'Enter'
-    || event.key === ' '
-  ) {
-
-    event.preventDefault()
-
-    playExample(example)
-
-  }
-
-}
-
-
-// ============================================================
-// Status
-// ============================================================
-
-const getStatusText = (
-  example: RefineExample
-) => {
-
-  if (example.playing) {
-
-    return 'Refining...'
-
-  }
-
-
-  if (
-    example.currentImageIndex === 0
-  ) {
-
-    return 'Click to refine'
-
-  }
-
-
-  return 'Refined'
-
-}
-
-
-const getFrameText = (
-  example: RefineExample
-) => {
-
-  if (
-    example.currentImageIndex === 0
-  ) {
-
+  if (imageIndex === 0) {
     return 'Draft'
-
   }
 
+  if (imageIndex === totalImages - 1) {
+    return 'Final'
+  }
+
+  return `Step ${imageIndex}`
+}
+
+const getFrameDescription = (
+  example: RefineExample,
+  imageIndex: number,
+  totalImages: number
+) => {
+  const frameLabel =
+    getFrameLabel(
+      imageIndex,
+      totalImages
+    )
 
   return (
-    `${String(example.currentImageIndex).padStart(2, '0')}`
-    + ' / '
-    + `${String(example.frames.length).padStart(2, '0')}`
+    `${example.title} structure-aware refinement: `
+    + frameLabel
   )
-
 }
 
 
@@ -659,26 +318,9 @@ const getFrameText = (
 // ============================================================
 
 onMounted(() => {
-
   examples.forEach((example) => {
-
     loadExample(example)
-
   })
-
-})
-
-
-onBeforeUnmount(() => {
-
-  examples.forEach((example) => {
-
-    clearExampleTimer(
-      example.id
-    )
-
-  })
-
 })
 
 </script>
@@ -694,12 +336,8 @@ onBeforeUnmount(() => {
   >
 
 
-    <!-- Standalone divider -->
-
     <el-divider v-if="!embedded" />
 
-
-    <!-- Standalone title -->
 
     <el-row
       v-if="!embedded && showTitle"
@@ -713,8 +351,6 @@ onBeforeUnmount(() => {
     </el-row>
 
 
-    <!-- Embedded title -->
-
     <el-row
       v-if="embedded && showTitle"
       justify="center"
@@ -727,9 +363,9 @@ onBeforeUnmount(() => {
     </el-row>
 
 
-    <!-- ================================================== -->
+    <!-- ====================================================== -->
     <!-- Introduction -->
-    <!-- ================================================== -->
+    <!-- ====================================================== -->
 
     <el-row justify="center">
 
@@ -741,23 +377,27 @@ onBeforeUnmount(() => {
         :xl="12"
       >
 
+        <img
+          src="/refine.jpg"
+          alt="Structure-aware refinement overview"
+          class="refine-image"
+        />
+
         <p class="refine-desc">
 
-          We visualize how structure-aware refinement progressively
-          transforms coarse scene drafts into detailed sketches while
-          preserving their object structures and spatial layouts.
-          Click each example to inspect its refinement process.
-
+          We visualize how structure-aware refinement progressively transforms coarse scene drafts into detailed sketches while preserving their object structures and spatial layouts. Specifically, the draft assets are first converted into structure-preserving optimization primitives through curve contour resampling, where each object is represented by a fixed set of resampled contour curves. The refinement process then performs progressive joint optimization, gradually enhancing object details while compositing them into the scene according to the established layout. 
+  
         </p>
+
 
       </el-col>
 
     </el-row>
 
 
-    <!-- ================================================== -->
-    <!-- Example grid -->
-    <!-- ================================================== -->
+    <!-- ====================================================== -->
+    <!-- One expanded example at a time -->
+    <!-- ====================================================== -->
 
     <el-row justify="center">
 
@@ -769,262 +409,205 @@ onBeforeUnmount(() => {
         :xl="12"
       >
 
-        <div class="refine-grid">
+        <div
+          class="example-switcher"
+          tabindex="0"
+          aria-label="Structure-aware refinement examples"
+          @keydown="handleExampleKeydown"
+        >
 
 
-          <article
-            v-for="example in examples"
-            :key="example.id"
-            class="refine-example"
+          <button
+            class="example-arrow example-arrow-left"
+            type="button"
+            aria-label="Previous refinement example"
+            @click="previousExample"
           >
 
+            <el-icon>
+              <ArrowLeft />
+            </el-icon>
 
-            <!-- Example information -->
-
-            <div class="example-header">
-
-
-              <span class="example-title">
-
-                {{ example.title }}
-
-              </span>
+          </button>
 
 
-              <span class="example-frame">
+          <transition
+            name="example-fade"
+            mode="out-in"
+          >
 
-                {{ getFrameText(example) }}
-
-              </span>
-
-
-            </div>
-
-
-            <!-- Caption -->
-
-            <p class="scene-caption">
-
-              “{{ example.caption }}”
-
-            </p>
-
-
-            <!-- Loading -->
-
-            <div
-              v-if="example.loading"
-              class="refine-card state-card"
-            >
-
-              <el-skeleton
-                animated
-                :rows="5"
-              />
-
-            </div>
-
-
-            <!-- Error -->
-
-            <div
-              v-else-if="example.error"
-              class="
-                refine-card
-                state-card
-                error-state
-              "
-            >
-
-              {{ example.error }}
-
-            </div>
-
-
-            <!-- Interactive refinement -->
-
-            <div
-              v-else
-              class="refine-card"
-              role="button"
-              tabindex="0"
-              :aria-label="
-                `${example.title}: click to play refinement`
-              "
-              @click="playExample(example)"
-              @keydown="
-                handleCardKeydown(
-                  $event,
-                  example
-                )
-              "
+            <article
+              :key="currentExample.id"
+              class="refine-example"
             >
 
 
-              <!-- Image stage -->
+              <header class="example-header">
 
-              <div class="image-stage">
+                <div class="example-heading-row">
 
+                  <div class="example-heading">
 
-                <!--
-                  所有图片预先渲染并重叠放置。
-                  只改变 opacity，避免 img src 切换闪烁。
-                -->
-
-                <img
-                  v-for="(imageUrl, imageIndex) in getAllImages(example)"
-                  :key="
-                    `${example.id}-image-${imageIndex}`
-                  "
-                  :src="imageUrl"
-                  :alt="
-                    imageIndex === 0
-                      ? `${example.title} draft`
-                      : `${example.title} refinement frame ${imageIndex}`
-                  "
-                  class="refinement-image"
-                  :class="{
-                    'refinement-image-active':
-                      imageIndex
-                      === example.currentImageIndex
-                  }"
-                  loading="eager"
-                  decoding="sync"
-                  draggable="false"
-                />
-
-
-                <!-- Draft label -->
-
-                <div
-                  class="stage-label"
-                  :class="{
-                    'stage-label-playing':
-                      example.playing
-                  }"
-                >
-
-                  {{
-                    example.currentImageIndex === 0
-                      ? 'Initial Draft'
-                      : 'Structure-aware Refinement'
-                  }}
-
-                </div>
-
-
-                <!-- Click overlay -->
-
-                <div
-                  class="play-overlay"
-                  :class="{
-                    'play-overlay-hidden':
-                      example.playing
-                  }"
-                >
-
-
-                  <div class="play-circle">
-
-                    <el-icon>
-
-                      <VideoPlay />
-
-                    </el-icon>
+                    <span class="example-title">
+                      {{ currentExample.title }}
+                    </span>
 
                   </div>
 
-
-                  <span>
-
-                    {{ getStatusText(example) }}
-
+                  <span class="example-progress">
+                    {{ String(currentExampleIndex + 1).padStart(2, '0') }}
+                    /
+                    {{ String(examples.length).padStart(2, '0') }}
                   </span>
-
 
                 </div>
 
+                <p class="scene-caption">
+                  “{{ currentExample.caption }}”
+                </p>
 
-                <!-- Playing indicator -->
-
-                <div
-                  v-if="example.playing"
-                  class="playing-indicator"
-                >
+              </header>
 
 
-                  <el-icon class="playing-icon">
+              <div
+                v-if="currentExample.loading"
+                class="sequence-state-card"
+              >
 
-                    <RefreshRight />
+                <div class="skeleton-grid">
 
-                  </el-icon>
-
-
-                  <span>
-                    Refining
-                  </span>
-
+                  <el-skeleton-item
+                    v-for="itemIndex in 4"
+                    :key="itemIndex"
+                    variant="image"
+                    class="skeleton-frame"
+                  />
 
                 </div>
-
 
               </div>
 
 
-              <!-- Bottom status -->
-
-              <div class="card-footer">
-
-
-                <span>
-
-                  {{
-                    example.playing
-                      ? 'Click to stop'
-                      : 'Click the image to replay'
-                  }}
-
-                </span>
+              <div
+                v-else-if="currentExample.error"
+                class="sequence-state-card error-state"
+              >
+                {{ currentExample.error }}
+              </div>
 
 
-                <div
-                  class="frame-dots"
-                  aria-hidden="true"
+              <div
+                v-else
+                class="sequence-grid"
+              >
+
+                <figure
+                  v-for="(
+                    imageUrl,
+                    imageIndex
+                  ) in getAllImages(currentExample)"
+                  :key="`${currentExample.id}-${imageIndex}`"
+                  class="sequence-item"
                 >
 
+                  <div class="sequence-image-wrapper">
 
-                  <span
-                    class="frame-dot"
-                    :class="{
-                      'frame-dot-active':
-                        example.currentImageIndex === 0
-                    }"
-                  />
+                    <el-image
+                      class="sequence-image"
+                      :src="imageUrl"
+                      :alt="
+                        getFrameDescription(
+                          currentExample,
+                          imageIndex,
+                          currentExample.frames.length + 1
+                        )
+                      "
+                      :preview-src-list="getAllImages(currentExample)"
+                      :initial-index="imageIndex"
+                      fit="contain"
+                      preview-teleported
+                      hide-on-click-modal
+                      loading="eager"
+                    />
 
+                    <span
+                      class="frame-label"
+                      :class="{
+                        'frame-label-draft':
+                          imageIndex === 0,
+                        'frame-label-final':
+                          imageIndex === currentExample.frames.length
+                      }"
+                    >
+                      {{
+                        getFrameLabel(
+                          imageIndex,
+                          currentExample.frames.length + 1
+                        )
+                      }}
+                    </span>
 
-                  <span
-                    v-for="frameIndex in example.frames.length"
-                    :key="
-                      `${example.id}-dot-${frameIndex}`
-                    "
-                    class="frame-dot"
-                    :class="{
-                      'frame-dot-active':
-                        example.currentImageIndex === frameIndex
-                    }"
-                  />
+                  </div>
 
+                  <figcaption class="frame-caption">
 
-                </div>
+                    <span>
+                      {{
+                        getFrameLabel(
+                          imageIndex,
+                          currentExample.frames.length + 1
+                        )
+                      }}
+                    </span>
 
+                    <span class="frame-index">
+                      {{ imageIndex + 1 }}
+                      /
+                      {{ currentExample.frames.length + 1 }}
+                    </span>
+
+                  </figcaption>
+
+                </figure>
 
               </div>
 
 
-            </div>
+              <div class="example-dots">
+
+                <button
+                  v-for="(example, exampleIndex) in examples"
+                  :key="example.id"
+                  type="button"
+                  class="example-dot"
+                  :class="{
+                    'example-dot-active':
+                      exampleIndex === currentExampleIndex
+                  }"
+                  :aria-label="`Show ${example.title}`"
+                  @click="selectExample(exampleIndex)"
+                />
+
+              </div>
 
 
-          </article>
+            </article>
+
+          </transition>
+
+
+          <button
+            class="example-arrow example-arrow-right"
+            type="button"
+            aria-label="Next refinement example"
+            @click="nextExample"
+          >
+
+            <el-icon>
+              <ArrowRight />
+            </el-icon>
+
+          </button>
 
 
         </div>
@@ -1047,699 +630,582 @@ onBeforeUnmount(() => {
    ============================================================ */
 
 .refine-section {
-
   width: 100%;
-
 }
-
 
 .refine-embedded {
-
   margin-top: 0;
-
 }
 
 
 /* ============================================================
-   Description
+   Introduction
    ============================================================ */
+
+.refine-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 0 22px;
+  object-fit: contain;
+}
 
 .refine-desc {
-
   margin:
     0
     0
-    28px;
-
+    32px;
   color: #000;
-
-  font-size: 16px;
-
+  font-size: 18px;
   line-height: 1.8;
-
   text-align: justify;
-
 }
 
 
 /* ============================================================
-   Grid
+   Example switcher
    ============================================================ */
 
-.refine-grid {
+.example-switcher {
+  --example-accent: #ffc862c4;
+  --example-accent-soft: rgba(255, 200, 98, 0.16);
+  --example-accent-text: #8a640f;
 
-  display: grid;
-
-  grid-template-columns:
-    repeat(
-      3,
-      minmax(0, 1fr)
-    );
-
-  gap:
-    22px
-    18px;
-
+  position: relative;
   width: 100%;
-
   margin:
-    8px
+    4px
     0
-    48px;
-
+    54px;
+  padding: 0;
+  box-sizing: border-box;
+  outline: none;
 }
 
-
-/* ============================================================
-   Example
-   ============================================================ */
+.example-switcher:focus-visible {
+  border-radius: 12px;
+  box-shadow:
+    0
+    0
+    0
+    3px
+    var(--example-accent-soft);
+}
 
 .refine-example {
-
+  width: 100%;
   min-width: 0;
-
 }
 
+
+/* ============================================================
+   Example arrows
+   ============================================================ */
+
+.example-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  color: #333;
+  font-size: 19px;
+  background: #fff;
+  border:
+    1px
+    solid
+    #d5d5d5;
+  border-radius: 50%;
+  box-shadow:
+    0
+    4px
+    14px
+    rgba(0, 0, 0, 0.11);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.example-arrow:hover {
+  color: var(--example-accent-text);
+  background: var(--example-accent-soft);
+  border-color: var(--example-accent);
+  box-shadow:
+    0
+    7px
+    18px
+    rgba(0, 0, 0, 0.16);
+}
+
+.example-arrow:active {
+  transform:
+    translateY(-50%)
+    scale(0.95);
+}
+
+.example-arrow:focus-visible {
+  outline:
+    2px
+    solid
+    var(--example-accent);
+  outline-offset: 2px;
+}
+
+.example-arrow-left {
+  left: -58px;
+}
+
+.example-arrow-right {
+  right: -58px;
+}
+
+
+/* ============================================================
+   Example header
+   ============================================================ */
 
 .example-header {
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: space-between;
-
-  gap: 12px;
-
-  margin-bottom: 7px;
-
+  margin-bottom: 0;
 }
 
+.example-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 7px;
+}
+
+.example-heading {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+}
 
 .example-title {
-
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
   color: #252525;
-
-  font-size: 14px;
-
+  font-family: inherit;
+  font-size: 18px;
+  font-style: normal;
   font-weight: 600;
-
+  line-height: 1.4;
+  text-align: left;
 }
 
-
-.example-frame {
-
+.example-title::before {
   flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  background: var(--example-accent);
+  border-radius: 50%;
+  box-shadow:
+    0
+    0
+    0
+    4px
+    var(--example-accent-soft);
+  content: '';
+}
 
-  color: #929292;
-
+.example-count {
+  padding:
+    3px
+    8px;
+  color: #777;
   font-family:
     Consolas,
     Monaco,
     "Courier New",
     monospace;
-
-  font-size: 9px;
-
-  letter-spacing: 0.025em;
-
-  text-transform: uppercase;
-
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  background: #f1f1f1;
+  border-radius: 999px;
 }
 
+.example-progress {
+  flex-shrink: 0;
+  padding: 5px 9px;
+  color: var(--example-accent-text);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  background: var(--example-accent-soft);
+  border: 1px solid var(--example-accent);
+  border-radius: 999px;
+}
 
 .scene-caption {
-
-  display: -webkit-box;
-
-  min-height: 48px;
-
   margin:
     0
     0
-    10px;
-
-  overflow: hidden;
-
-  color: #333;
-
-  font-size: 12px;
-
+    8px;
+  color: #222;
+  font-family: inherit;
+  font-size: 15px;
   font-style: italic;
-
-  line-height: 1.55;
-
+  font-weight: 400;
+  line-height: 1.65;
   text-align: left;
-
-  -webkit-box-orient: vertical;
-
-  -webkit-line-clamp: 2;
-
 }
 
 
 /* ============================================================
-   Card
+   Expanded sequence grid
    ============================================================ */
 
-.refine-card {
-
+.sequence-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      4,
+      minmax(0, 1fr)
+    );
+  gap: 13px;
   width: 100%;
+}
 
+.sequence-item {
+  min-width: 0;
+  margin: 0;
   overflow: hidden;
-
   background: #fff;
-
   border:
     1px
     solid
     #dedfe2;
-
+  border-top:
+    3px
+    solid
+    var(--example-accent);
   border-radius: 9px;
-
   box-shadow:
     0
     4px
     14px
     rgba(0, 0, 0, 0.045);
-
   box-sizing: border-box;
-
-  cursor: pointer;
-
-  outline: none;
-
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease,
     transform 0.2s ease;
-
 }
 
-
-.refine-card:hover {
-
-  border-color: #bfc2c7;
-
+.sequence-item:hover {
+  border-color: var(--example-accent);
   box-shadow:
     0
     7px
-    20px
+    18px
     rgba(0, 0, 0, 0.075);
-
-  transform:
-    translateY(-2px);
-
+  transform: translateY(-2px);
 }
 
-
-.refine-card:focus-visible {
-
-  box-shadow:
-    0
-    0
-    0
-    2px
-    rgba(55, 55, 55, 0.16);
-
-}
-
-
-.state-card {
-
-  min-height: 290px;
-
-  padding: 18px;
-
-  cursor: default;
-
-}
-
-
-.error-state {
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  color: #c93b40;
-
-  font-size: 12px;
-
-  line-height: 1.6;
-
-  text-align: center;
-
-}
-
-
-/* ============================================================
-   Image stage
-   ============================================================ */
-
-.image-stage {
-
+.sequence-image-wrapper {
   position: relative;
-
   width: 100%;
-
   aspect-ratio: 1 / 1;
-
   overflow: hidden;
-
   background: #fff;
-
-  user-select: none;
-
 }
 
-
-/* ============================================================
-   Layered images
-   ============================================================ */
-
-.refinement-image {
-
-  position: absolute;
-
-  inset: 0;
-
-  z-index: 1;
-
+.sequence-image {
   display: block;
-
   width: 100%;
-
   height: 100%;
-
-  padding: 7px;
-
-  object-fit: contain;
-
-  opacity: 0;
-
-  pointer-events: none;
-
+  padding: 6px;
+  cursor: zoom-in;
   box-sizing: border-box;
-
-  transform:
-    scale(1.002);
-
-  transition:
-    opacity
-    170ms
-    linear;
-
-  user-select: none;
-
-  will-change: opacity;
-
 }
 
+.sequence-image :deep(.el-image__inner) {
+  object-fit: contain;
+  transition:
+    transform
+    0.22s
+    ease;
+}
 
-.refinement-image-active {
-
-  z-index: 2;
-
-  opacity: 1;
-
+.sequence-image:hover :deep(.el-image__inner) {
+  transform: scale(1.025);
 }
 
 
 /* ============================================================
-   Stage label
+   Frame labels
    ============================================================ */
 
-.stage-label {
-
+.frame-label {
   position: absolute;
-
-  top: 9px;
-
-  left: 9px;
-
-  z-index: 8;
-
+  top: 7px;
+  left: 7px;
+  z-index: 2;
   padding:
-    5px
-    8px;
-
-  color: #686868;
-
-  font-size: 8px;
-
-  font-weight: 600;
-
-  letter-spacing: 0.03em;
-
-  text-transform: uppercase;
-
+    4px
+    7px;
+  color: #555;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
   background:
     rgba(
-      240,
-      240,
-      240,
-      0.9
-    );
-
-  border-radius: 4px;
-
-  backdrop-filter:
-    blur(5px);
-
-  transition:
-    color 0.2s ease,
-    background-color 0.2s ease;
-
-}
-
-
-.stage-label-playing {
-
-  color: #a82e33;
-
-  background:
-    rgba(
-      255,
-      229,
-      230,
+      242,
+      242,
+      242,
       0.92
     );
-
+  border-radius: 4px;
+  backdrop-filter: blur(5px);
 }
 
-
-/* ============================================================
-   Play overlay
-   ============================================================ */
-
-.play-overlay {
-
-  position: absolute;
-
-  inset: 0;
-
-  z-index: 7;
-
-  display: flex;
-
-  flex-direction: column;
-
-  align-items: center;
-
-  justify-content: center;
-
-  gap: 8px;
-
+.frame-label-draft {
   color: #444;
-
-  font-size: 10px;
-
-  font-weight: 600;
-
-  letter-spacing: 0.02em;
-
   background:
     rgba(
-      255,
-      255,
-      255,
-      0
-    );
-
-  opacity: 0;
-
-  transition:
-    opacity 0.2s ease,
-    background-color 0.2s ease;
-
-}
-
-
-.refine-card:hover
-.play-overlay {
-
-  background:
-    rgba(
-      255,
-      255,
-      255,
-      0.52
-    );
-
-  opacity: 1;
-
-}
-
-
-.play-overlay-hidden {
-
-  visibility: hidden;
-
-  opacity: 0;
-
-}
-
-
-.play-circle {
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  width: 42px;
-
-  height: 42px;
-
-  color: #fff;
-
-  font-size: 20px;
-
-  background:
-    rgba(
-      45,
-      45,
-      45,
-      0.84
-    );
-
-  border-radius: 50%;
-
-  box-shadow:
-    0
-    3px
-    10px
-    rgba(0, 0, 0, 0.16);
-
-}
-
-
-/* ============================================================
-   Playing indicator
-   ============================================================ */
-
-.playing-indicator {
-
-  position: absolute;
-
-  right: 9px;
-
-  bottom: 9px;
-
-  z-index: 8;
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 5px;
-
-  padding:
-    5px
-    8px;
-
-  color: #a72e33;
-
-  font-size: 8px;
-
-  font-weight: 600;
-
-  letter-spacing: 0.025em;
-
-  text-transform: uppercase;
-
-  background:
-    rgba(
-      255,
-      231,
-      232,
+      235,
+      235,
+      235,
       0.94
     );
-
-  border-radius: 4px;
-
-  backdrop-filter:
-    blur(5px);
-
 }
 
-
-.playing-icon {
-
-  animation:
-    refine-rotate
-    1s
-    linear
-    infinite;
-
+.frame-label-final {
+  color: #8e2c31;
+  background:
+    rgba(
+      255,
+      232,
+      233,
+      0.94
+    );
 }
 
-
-@keyframes refine-rotate {
-
-  from {
-
-    transform:
-      rotate(0deg);
-
-  }
-
-  to {
-
-    transform:
-      rotate(360deg);
-
-  }
-
-}
-
-
-/* ============================================================
-   Footer
-   ============================================================ */
-
-.card-footer {
-
+.frame-caption {
   display: flex;
-
   align-items: center;
-
   justify-content: space-between;
-
-  gap: 10px;
-
+  gap: 7px;
   min-height: 35px;
-
   padding:
     7px
-    10px;
-
-  color: #919191;
-
-  font-size: 8px;
-
+    8px;
+  color: #555;
+  font-size: 11px;
+  font-weight: 600;
   background: #f4f4f4;
-
   border-top:
     1px
     solid
-    #dfdfdf;
-
+    #e2e2e2;
   box-sizing: border-box;
-
 }
 
-
-.frame-dots {
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: flex-end;
-
-  gap: 3px;
-
-  min-width: 0;
-
-  overflow: hidden;
-
-}
-
-
-.frame-dot {
-
+.frame-index {
   flex-shrink: 0;
-
-  width: 4px;
-
-  height: 4px;
-
-  background: #c8c8c8;
-
-  border-radius: 50%;
-
-  transition:
-    width 0.15s ease,
-    background-color 0.15s ease;
-
+  color: #999;
+  font-family:
+    Consolas,
+    Monaco,
+    "Courier New",
+    monospace;
+  font-size: 10px;
 }
 
 
-.frame-dot-active {
+/* ============================================================
+   Example dots
+   ============================================================ */
 
-  width: 10px;
+.example-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 18px;
+}
 
-  background: #c9343a;
+.example-dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  background: #c8c8c8;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    width 0.18s ease,
+    background-color 0.18s ease;
+}
 
-  border-radius: 4px;
+.example-dot:hover {
+  background: var(--example-accent);
+}
 
+.example-dot-active {
+  width: 24px;
+  background: var(--example-accent);
+}
+
+.example-dot:focus-visible {
+  outline:
+    2px
+    solid
+    var(--example-accent);
+  outline-offset: 2px;
+}
+
+
+/* ============================================================
+   Loading and error states
+   ============================================================ */
+
+.sequence-state-card {
+  width: 100%;
+  min-height: 180px;
+  padding: 14px;
+  background: #f8f8f8;
+  border:
+    1px
+    solid
+    #dedfe2;
+  border-top:
+    3px
+    solid
+    var(--example-accent);
+  border-radius: 9px;
+  box-sizing: border-box;
+}
+
+.skeleton-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      4,
+      minmax(0, 1fr)
+    );
+  gap: 13px;
+}
+
+.skeleton-frame {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 7px;
+}
+
+.error-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c93b40;
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+
+/* ============================================================
+   Transition
+   ============================================================ */
+
+.example-fade-enter-active,
+.example-fade-leave-active {
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
+}
+
+.example-fade-enter-from {
+  opacity: 0;
+  transform: translateX(12px);
+}
+
+.example-fade-leave-to {
+  opacity: 0;
+  transform: translateX(-12px);
 }
 
 
 /* ============================================================
    Responsive
    ============================================================ */
-@media (max-width: 1199px) {
-  .refine-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+@media (max-width: 991px) {
+  .example-arrow-left {
+    left: 8px;
+  }
+
+  .example-arrow-right {
+    right: 8px;
+  }
+
+  .sequence-grid,
+  .skeleton-grid {
+    grid-template-columns:
+      repeat(
+        3,
+        minmax(0, 1fr)
+      );
   }
 }
-
 
 @media (max-width: 767px) {
-  .refine-grid {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 22px;
+  .refine-desc {
+    text-align: left;
   }
 
-  .scene-caption {
-    min-height: auto;
-    -webkit-line-clamp: 3;
+  .example-arrow {
+    width: 36px;
+    height: 36px;
+    font-size: 17px;
+  }
+
+  .sequence-grid,
+  .skeleton-grid {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+    gap: 10px;
   }
 }
 
-
 @media (max-width: 480px) {
-  .refine-grid {
-    margin-bottom: 40px;
+  .example-arrow {
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
   }
 
-  .example-title {
-    font-size: 13px;
+  .example-heading-row {
+    align-items: flex-start;
   }
 
-  .scene-caption {
-    font-size: 11px;
+  .example-heading {
+    align-items: center;
+    flex-direction: row;
+    gap: 8px;
   }
 
-  .play-overlay {
-    background: rgba(255, 255, 255, 0.3);
-    opacity: 1;
+  .sequence-grid,
+  .skeleton-grid {
+    grid-template-columns:
+      minmax(0, 1fr);
   }
 }
 

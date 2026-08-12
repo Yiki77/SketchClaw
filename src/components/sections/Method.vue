@@ -50,7 +50,7 @@ import Refine from './Refine.vue'
 
 
           <h1 class="method-main-title">
-            How does SketchClaw work?
+            Methodology
           </h1>
 
 

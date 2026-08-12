@@ -82,10 +82,10 @@ const galleryConfigs: GalleryConfig[] = [
       'A chef in the kitchen.',
 
     svg:
-      './carousel/1-chef.svg',
+      '/carousel/1-chef.svg',
 
     draft:
-      './carousel/1-chef_draft.jpg'
+      '/carousel/1-chef_draft.jpg'
   },
 
 
@@ -98,10 +98,10 @@ const galleryConfigs: GalleryConfig[] = [
       'A staggered city skyline of spires, domes, and clock towers; street trees and lampposts line the foreground, and flocks of birds fly in the sky.',
 
     svg:
-      './carousel/2-city.svg',
+      '/carousel/2-city.svg',
 
     draft:
-      './carousel/2-city_draft.jpg'
+      '/carousel/2-city_draft.jpg'
   },
 
 
@@ -114,10 +114,10 @@ const galleryConfigs: GalleryConfig[] = [
       'Four ducks are swimming in the pool.',
 
     svg:
-      './carousel/3-ducks.svg',
+      '/carousel/3-ducks.svg',
 
     draft:
-      './carousel/3-ducks_draft.jpg'
+      '/carousel/3-ducks_draft.jpg'
   }
 
 ]
@@ -182,11 +182,6 @@ const SVG_FIT_MIN_PADDING = 16
 const DEFAULT_SVG_WIDTH = 780
 
 const DEFAULT_SVG_HEIGHT = 780
-
-
-// Separate More Results page. BASE_URL keeps GitHub Pages sub-paths working.
-const moreResultsUrl =
-  `${import.meta.env.BASE_URL}more-results.html`
 
 
 let stopActiveInteraction:
@@ -2693,39 +2688,21 @@ onBeforeUnmount(() => {
         :xl="12"
       >
 
-        <div class="gallery-interaction-row">
+        <p class="gallery-interaction-tip gallery-interaction-tip-top">
 
-          <p class="gallery-interaction-tip gallery-interaction-tip-top">
-
-            <span
-              class="gallery-interaction-icon"
-              aria-hidden="true"
-            >
-              ✦
-            </span>
-
-            <span>
-              Click and move any object below to explore different
-              compositions and spark new ideas.
-            </span>
-
-          </p>
-
-          <a
-            class="more-results-button"
-            :href="moreResultsUrl"
-            aria-label="View more SketchClaw results"
+          <span
+            class="gallery-interaction-icon"
+            aria-hidden="true"
           >
-            <span>More results</span>
-            <span
-              class="more-results-arrow"
-              aria-hidden="true"
-            >
-              →
-            </span>
-          </a>
+            ✦
+          </span>
 
-        </div>
+          <span>
+            Click and move any object below to explore different
+            compositions and spark new ideas.
+          </span>
+
+        </p>
 
         <div class="gallery-grid">
 
@@ -3458,62 +3435,6 @@ onBeforeUnmount(() => {
   text-align: justify;
 }
 
-.gallery-interaction-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  width: 100%;
-  margin: 0 0 12px;
-}
-
-.more-results-button {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  min-height: 34px;
-  padding: 6px 13px;
-  color: #7f4a20;
-  font-size: 14px;
-  font-weight: 650;
-  line-height: 1;
-  text-decoration: none;
-  background: #fffaf5;
-  border: 1px solid #edb98e;
-  border-radius: 999px;
-  box-sizing: border-box;
-  transition:
-    background 0.2s ease,
-    border-color 0.2s ease,
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.more-results-button:hover {
-  color: #6f3f1a;
-  background: #fff3e8;
-  border-color: #df9a62;
-  box-shadow: 0 4px 12px rgba(181, 107, 47, 0.12);
-  transform: translateY(-1px);
-}
-
-.more-results-button:focus-visible {
-  outline: 2px solid rgba(229, 139, 67, 0.45);
-  outline-offset: 3px;
-}
-
-.more-results-arrow {
-  font-size: 16px;
-  line-height: 1;
-  transition: transform 0.2s ease;
-}
-
-.more-results-button:hover .more-results-arrow {
-  transform: translateX(2px);
-}
-
 .gallery-interaction-tip {
   display: flex;
   align-items: center;
@@ -3528,7 +3449,10 @@ onBeforeUnmount(() => {
 }
 
 .gallery-interaction-tip-top {
-  margin: 0;
+  margin:
+    0
+    0
+    12px;
   padding:
     0
     2px;
@@ -3545,16 +3469,6 @@ onBeforeUnmount(() => {
 /* Responsive */
 
 @media (max-width: 767px) {
-
-  .gallery-interaction-row {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 9px;
-  }
-
-  .more-results-button {
-    align-self: flex-end;
-  }
 
   .try-panel {
     padding:
