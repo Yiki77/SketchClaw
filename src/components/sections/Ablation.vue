@@ -1,69 +1,126 @@
 <script lang="ts" setup>
+const baseUrl = import.meta.env.BASE_URL
 
-const reasoningAblations = [
+const vlmBackboneImage = `${baseUrl}abla_banchmark.jpg`
+const reasoningAblationImage = `${baseUrl}abla_Reasoning.jpg`
+const contourResamplingImage = `${baseUrl}abla_resampling.jpg`
+const progressiveJointImage = `${baseUrl}abla_joint.jpg`
+
+const backboneRows = [
   {
-    key: 'plan',
-    title: 'w/o Plan',
-    subtitle: 'Code-driven Planning',
-    effect:
-      'Without executable scene programs, object attributes become harder to coordinate, leading to overlaps, unreasonable spatial arrangements, unrealistic scaling, and boundary violations.',
-    tone: 'orange',
+    method: 'Gemini-3.1-pro',
+    sem: '0.858',
+    comp: '0.723',
+    compl: '0.723',
+    aes: '0.819',
+    size: '0.707',
+    iter: '5.332',
+    ver: '0.535',
+    best: false,
   },
   {
-    key: 'geo',
-    title: 'w/o Geo. Ver.',
-    subtitle: 'Geometric Verification',
-    effect:
-      'Removing geometric constraints mainly affects physical plausibility, introducing out-of-bound strokes, invalid positions, and inconsistent relative scales.',
-    tone: 'yellow',
+    method: 'Claude-Opus-4-7',
+    sem: '0.879',
+    comp: '0.681',
+    compl: '0.791',
+    aes: '0.739',
+    size: '0.721',
+    iter: '5.843',
+    ver: '0.477',
+    best: false,
   },
   {
-    key: 'sem',
-    title: 'w/o Sem. Ver.',
-    subtitle: 'Visual-Semantic Verification',
-    effect:
-      'Without multimodal visual feedback, the agent may produce incorrect object relationships, missing semantic interactions, and unnatural occlusion orders.',
-    tone: 'green',
+    method: 'Qwen3.7-Plus',
+    sem: '0.629',
+    comp: '0.477',
+    compl: '0.526',
+    aes: '0.552',
+    size: '0.507',
+    iter: '10.743',
+    ver: '0.436',
+    best: false,
   },
   {
-    key: 'short',
-    title: 'w/o Short Mem.',
-    subtitle: 'Short-term Memory',
-    effect:
-      'Visual degradation can be limited, but the agent repeatedly explores similar unsuccessful layouts, increasing reflection steps from 1.375 to 2.875.',
-    tone: 'purple',
-  },
-  {
-    key: 'long',
-    title: 'w/o Long Mem.',
-    subtitle: 'Long-term Memory',
-    effect:
-      'The agent can still produce reasonable structures, but cannot retrieve reusable cross-concept layout experience, resulting in less effective scene composition.',
-    tone: 'orange',
+    method: 'OpenAI GPT-5.5',
+    sem: '0.926',
+    comp: '0.795',
+    compl: '0.811',
+    aes: '0.871',
+    size: '0.785',
+    iter: '1.656',
+    ver: '0.803',
+    best: true,
   },
 ]
 
-const limitations = [
+const reasoningRows = [
   {
-    index: '01',
-    title: 'Complex Relations',
-    text:
-      'SketchClaw may struggle with complex physical and semantic interactions, such as a woman interacting with a kettle or a castle located on a hill. Stronger relational and interaction modeling may improve scene understanding.',
+    method: 'w/o Plan',
+    sem: '0.680',
+    comp: '0.507',
+    compl: '0.573',
+    aes: '0.648',
+    size: '0.472',
+    iter: '12.375',
+    ver: '0.357',
+    best: false,
   },
   {
-    index: '02',
-    title: 'Instance Consistency',
-    text:
-      'Structure-aware refinement may hallucinate redundant instances, such as duplicating a sheep. Instance-aware constraints could better preserve object identity and count.',
+    method: 'w/o Geo. Ver.',
+    sem: '0.700',
+    comp: '0.553',
+    compl: '0.570',
+    aes: '0.658',
+    size: '0.589',
+    iter: '1.857',
+    ver: '0.633',
+    best: false,
   },
   {
-    index: '03',
-    title: 'Computational Cost',
-    text:
-      'Multimodal verification and iterative optimization introduce additional computational cost, especially when multiple refinement rounds are required. More efficient verification and optimization remain future directions.',
+    method: 'w/o Sem. Ver.',
+    sem: '0.606',
+    comp: '0.515',
+    compl: '0.647',
+    aes: '0.576',
+    size: '0.550',
+    iter: '1.438',
+    ver: '0.468',
+    best: false,
+  },
+  {
+    method: 'w/o Short Mem.',
+    sem: '0.740',
+    comp: '0.661',
+    compl: '0.607',
+    aes: '0.677',
+    size: '0.687',
+    iter: '2.875',
+    ver: '0.635',
+    best: false,
+  },
+  {
+    method: 'w/o Long Mem.',
+    sem: '0.747',
+    comp: '0.697',
+    compl: '0.615',
+    aes: '0.713',
+    size: '0.677',
+    iter: '1.600',
+    ver: '0.650',
+    best: false,
+  },
+  {
+    method: 'SketchClaw',
+    sem: '0.817',
+    comp: '0.769',
+    compl: '0.707',
+    aes: '0.738',
+    size: '0.733',
+    iter: '1.375',
+    ver: '0.873',
+    best: true,
   },
 ]
-
 </script>
 
 <template>
@@ -114,9 +171,6 @@ const limitations = [
             <span class="ablation-scope-tag scope-refinement">
               Structure-aware Refinement
             </span>
-            <span class="ablation-scope-tag scope-limitations">
-              Limitations
-            </span>
           </div>
         </section>
 
@@ -131,29 +185,67 @@ const limitations = [
             <span class="ablation-section-heading-line" />
           </div>
 
-          <div class="table-placeholder-card">
-            <div class="placeholder-badge">TABLE</div>
-            <div class="placeholder-title">
-              VLM Backbone Ablation Table
+          <div class="result-block">
+            <div class="result-block-title">
+              VLM Backbone Ablation
             </div>
-            <div class="placeholder-subtitle">
-              Replace this block with the quantitative table from
-              <code>Tables/abla_backbone</code>.
+
+            <div class="table-scroll">
+              <table class="ablation-table">
+                <thead>
+                  <tr>
+                    <th class="method-col">Method</th>
+                    <th>Sem. ↑</th>
+                    <th>Comp. ↑</th>
+                    <th>Compl. ↑</th>
+                    <th>Aes. ↑</th>
+                    <th>Size ↑</th>
+                    <th>Iter. ↓</th>
+                    <th>Ver. ↑</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr
+                    v-for="row in backboneRows"
+                    :key="row.method"
+                    :class="{ 'best-row': row.best }"
+                  >
+                    <td class="method-col">
+                      {{ row.method }}
+                    </td>
+                    <td>{{ row.sem }}</td>
+                    <td>{{ row.comp }}</td>
+                    <td>{{ row.compl }}</td>
+                    <td>{{ row.aes }}</td>
+                    <td>{{ row.size }}</td>
+                    <td>{{ row.iter }}</td>
+                    <td>{{ row.ver }}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
+
+            <p class="result-caption">
+              <strong>Impact of different VLM backbones.</strong>
+              We compare the sketch verification quality and convergence
+              efficiency of SketchClaw using different VLM backbones.
+            </p>
           </div>
 
-          <div class="figure-placeholder-card">
-            <div class="figure-placeholder-canvas">
-              <div class="placeholder-grid-lines" />
-              <div class="figure-placeholder-content">
-                <span class="figure-placeholder-index">FIG.</span>
-                <strong>VLM Backbone Visual Comparison</strong>
-                <small>
-                  Placeholder for <code>Figures/abla_backbone</code>
-                </small>
-              </div>
+          <div class="visual-block">
+            <div class="visual-block-title">
+              VLM Backbone Visual Comparison
             </div>
 
+            <div class="figure-card">
+              <img
+                :src="vlmBackboneImage"
+                alt="Visual comparison of different VLM backbones"
+                class="ablation-figure"
+                loading="lazy"
+              />
+            </div>
           </div>
         </section>
 
@@ -168,28 +260,63 @@ const limitations = [
             <span class="ablation-section-heading-line" />
           </div>
 
-          <div class="table-placeholder-card compact-placeholder">
-            <div class="placeholder-badge">TABLE</div>
-            <div class="placeholder-title">
+          <div class="result-block">
+            <div class="result-block-title">
               Agentic Reasoning Component Ablation
             </div>
-            <div class="placeholder-subtitle">
-              Place the quantitative component-ablation results here.
+
+            <div class="table-scroll">
+              <table class="ablation-table">
+                <thead>
+                  <tr>
+                    <th class="method-col">Method</th>
+                    <th>Sem. ↑</th>
+                    <th>Comp. ↑</th>
+                    <th>Compl. ↑</th>
+                    <th>Aes. ↑</th>
+                    <th>Size ↑</th>
+                    <th>Iter. ↓</th>
+                    <th>Ver. ↑</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr
+                    v-for="row in reasoningRows"
+                    :key="row.method"
+                    :class="{ 'best-row': row.best }"
+                  >
+                    <td class="method-col">
+                      {{ row.method }}
+                    </td>
+                    <td>{{ row.sem }}</td>
+                    <td>{{ row.comp }}</td>
+                    <td>{{ row.compl }}</td>
+                    <td>{{ row.aes }}</td>
+                    <td>{{ row.size }}</td>
+                    <td>{{ row.iter }}</td>
+                    <td>{{ row.ver }}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
+
+        
           </div>
 
-          <div class="figure-placeholder-card">
-            <div class="figure-placeholder-canvas large-placeholder">
-              <div class="placeholder-grid-lines" />
-              <div class="figure-placeholder-content">
-                <span class="figure-placeholder-index">FIG.</span>
-                <strong>Agentic Reasoning Ablation Examples</strong>
-                <small>
-                  Placeholder for <code>Figures/supp_reasoning</code>
-                </small>
-              </div>
+          <div class="visual-block">
+            <div class="visual-block-title">
+              Agentic Reasoning Ablation Examples
             </div>
 
+            <div class="figure-card">
+              <img
+                :src="reasoningAblationImage"
+                alt="Agentic reasoning component ablation examples"
+                class="ablation-figure"
+                loading="lazy"
+              />
+            </div>
           </div>
         </section>
 
@@ -204,34 +331,32 @@ const limitations = [
             <span class="ablation-section-heading-line" />
           </div>
 
-          <!-- Curve contour resampling -->
-          <div class="figure-placeholder-card inner-figure-card">
+          <!-- A. Contour resampling -->
+          <div class="refinement-block">
             <div class="refinement-block-header">
               <span class="refinement-index">A</span>
               <div>
-                <h3>Effect of Progressive Joint Optimization</h3>
+                <h3>Effect of Contour Resampling</h3>
                 <p>
-                  Progressive optimization first stabilizes object-level
-                  refinement and then gradually improves global scene
-                  integration, reducing conflicts between local fidelity and
-                  scene-level consistency.
+                  Contour resampling provides a more uniform Bézier
+                  representation for object boundaries, supporting stable
+                  structure-aware refinement while preserving the original
+                  geometric contour.
                 </p>
               </div>
             </div>
-            
-            <div class="figure-placeholder-canvas">
-            <div class="placeholder-grid-lines" />
-            <div class="figure-placeholder-content">
-                <span class="figure-placeholder-index">FIG.</span>
-                <strong>Contour Resampling Comparison</strong>
-                <small>
-                Placeholder for <code>Figures/supp_resampling</code>
-                </small>
-            </div>
+
+            <div class="figure-card refinement-figure-card">
+              <img
+                :src="contourResamplingImage"
+                alt="Contour resampling comparison"
+                class="ablation-figure"
+                loading="lazy"
+              />
             </div>
           </div>
 
-          <!-- Progressive joint optimization -->
+          <!-- B. Progressive joint optimization -->
           <div class="refinement-block">
             <div class="refinement-block-header">
               <span class="refinement-index">B</span>
@@ -246,24 +371,16 @@ const limitations = [
               </div>
             </div>
 
-            
-
-            <div class="figure-placeholder-card inner-figure-card">
-              <div class="figure-placeholder-canvas large-placeholder">
-                <div class="placeholder-grid-lines" />
-                <div class="figure-placeholder-content">
-                  <span class="figure-placeholder-index">FIG.</span>
-                  <strong>Progressive Joint Optimization</strong>
-                  <small>
-                    Placeholder for <code>Figures/supp_progressive</code>
-                  </small>
-                </div>
-              </div>
+            <div class="figure-card refinement-figure-card">
+              <img
+                :src="progressiveJointImage"
+                alt="Progressive joint optimization comparison"
+                class="ablation-figure"
+                loading="lazy"
+              />
             </div>
           </div>
         </section>
-
-        
       </el-col>
     </el-row>
   </div>
@@ -414,18 +531,13 @@ const limitations = [
   border-color: #9dccaa;
 }
 
-.scope-limitations {
-  background: #f1ecfb;
-  border-color: #b7a2df;
-}
-
 /* ============================================================
    Shared section heading
    ============================================================ */
 
 .ablation-panel {
   width: 100%;
-  margin-bottom: 48px;
+  margin-bottom: 50px;
 }
 
 .ablation-section-heading {
@@ -433,7 +545,7 @@ const limitations = [
   align-items: center;
   gap: 14px;
   width: 100%;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 .ablation-section-heading-label {
@@ -467,155 +579,102 @@ const limitations = [
     );
 }
 
-.ablation-helper {
-  margin: 0 0 18px;
-  color: #555;
-  font-size: 15px;
-  font-weight: 400;
-  line-height: 1.65;
-  text-align: justify;
-}
-
 /* ============================================================
-   Backbone summary
+   Results / tables
    ============================================================ */
 
-.backbone-summary-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+.result-block,
+.visual-block {
   width: 100%;
-  margin-bottom: 16px;
+  margin-bottom: 22px;
 }
 
-.backbone-summary-card {
-  position: relative;
-  min-height: 168px;
-  padding: 18px 17px 16px;
-  overflow: hidden;
-  background: #fff;
-  border: 1px solid #e2e2df;
-  border-radius: 12px;
-  box-sizing: border-box;
-}
-
-.backbone-summary-card::after {
-  position: absolute;
-  right: -24px;
-  bottom: -34px;
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  opacity: 0.32;
-  content: '';
-}
-
-.card-orange::after {
-  background: #f9d7bd;
-}
-
-.card-green::after {
-  background: #d7ead4;
-}
-
-.card-purple::after {
-  background: #dfd5f0;
-}
-
-.backbone-rank {
-  margin-bottom: 10px;
-  color: #9a917f;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-}
-
-.backbone-summary-card h3 {
-  position: relative;
-  z-index: 1;
-  margin: 0 0 8px;
-  color: #292929;
+.result-block-title,
+.visual-block-title {
+  margin: 0 0 10px 2px;
+  color: #333;
   font-size: 15px;
-  font-weight: 750;
+  font-weight: 720;
   line-height: 1.4;
 }
 
-.backbone-summary-card p {
-  position: relative;
-  z-index: 1;
-  margin: 0;
-  color: #555;
-  font-size: 13px;
-  line-height: 1.62;
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  background: #fff;
+  border: 1px solid #dedfe2;
+  border-radius: 12px;
+  box-shadow: 0 5px 16px rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* ============================================================
-   Table placeholders
-   ============================================================ */
-
-.table-placeholder-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 120px;
-  margin-bottom: 16px;
-  padding: 20px;
-  background:
-    repeating-linear-gradient(
-      -45deg,
-      #fcfcfb,
-      #fcfcfb 12px,
-      #fafaf8 12px,
-      #fafaf8 24px
-    );
-  border: 1px dashed #cfcfc9;
-  border-radius: 11px;
-  box-sizing: border-box;
+.ablation-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  color: #353535;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
   text-align: center;
 }
 
-.compact-placeholder {
-  min-height: 108px;
+.ablation-table th,
+.ablation-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid #ececea;
+  white-space: nowrap;
 }
 
-.placeholder-badge {
-  margin-bottom: 7px;
-  padding: 3px 8px;
-  color: #796841;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.09em;
-  background: #fff7df;
-  border: 1px solid #ead89c;
-  border-radius: 999px;
+.ablation-table thead th {
+  color: #333;
+  font-size: 12px;
+  font-weight: 760;
+  background: #fafaf8;
+  border-bottom: 1px solid #cfcfcb;
 }
 
-.placeholder-title {
-  margin-bottom: 5px;
-  color: #3b3b38;
-  font-size: 15px;
+.ablation-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.ablation-table tbody tr:hover {
+  background: #fbfaf7;
+}
+
+.ablation-table .method-col {
+  min-width: 145px;
+  padding-left: 14px;
+  text-align: left;
+}
+
+.ablation-table .best-row {
+  font-weight: 760;
+  background: rgba(234, 247, 237, 0.58);
+}
+
+.ablation-table .best-row td {
+  border-top: 1px solid #d6ded4;
+}
+
+.result-caption {
+  margin: 10px 4px 0;
+  color: #666;
+  font-size: 12px;
+  line-height: 1.6;
+  text-align: left;
+}
+
+.result-caption strong {
+  color: #444;
   font-weight: 700;
 }
 
-.placeholder-subtitle {
-  color: #777;
-  font-size: 12px;
-  line-height: 1.55;
-}
-
-.placeholder-subtitle code,
-.figure-placeholder-content code {
-  color: #665d4c;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.95em;
-}
-
 /* ============================================================
-   Figure placeholders
+   Figures
    ============================================================ */
 
-.figure-placeholder-card {
+.figure-card {
   width: 100%;
   padding: 8px;
   overflow: hidden;
@@ -626,160 +685,13 @@ const limitations = [
   box-sizing: border-box;
 }
 
-.inner-figure-card {
-  margin-top: 16px;
-  box-shadow: none;
-}
-
-.figure-placeholder-canvas {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 250px;
-  overflow: hidden;
-  background:
-    linear-gradient(
-      135deg,
-      rgba(255, 248, 237, 0.72),
-      rgba(248, 252, 247, 0.72) 50%,
-      rgba(249, 247, 253, 0.72)
-    );
-  border: 1px dashed #d5d3cf;
-  border-radius: 8px;
-}
-
-.large-placeholder {
-  min-height: 290px;
-}
-
-.placeholder-grid-lines {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(65, 65, 65, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(65, 65, 65, 0.04) 1px, transparent 1px);
-  background-size: 22px 22px;
-  pointer-events: none;
-}
-
-.figure-placeholder-content {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 26px;
-  color: #565656;
-  text-align: center;
-}
-
-.figure-placeholder-index {
-  margin-bottom: 8px;
-  color: #9b8c6a;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-}
-
-.figure-placeholder-content strong {
-  margin-bottom: 6px;
-  color: #363636;
-  font-size: 16px;
-  font-weight: 750;
-}
-
-.figure-placeholder-content small {
-  color: #858585;
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.figure-caption {
-  margin: 10px 6px 2px;
-  color: #666;
-  font-size: 12px;
-  line-height: 1.55;
-  text-align: center;
-}
-
-/* ============================================================
-   Agentic reasoning ablations
-   ============================================================ */
-
-.reasoning-ablation-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.reasoning-ablation-card {
-  position: relative;
-  min-height: 148px;
-  padding: 17px 18px 16px;
+.ablation-figure {
+  display: block;
+  width: 100%;
+  height: auto;
   background: #fff;
-  border: 1px solid #e2e2df;
-  border-radius: 12px;
-  box-sizing: border-box;
-}
-
-.reasoning-ablation-card:last-child {
-  grid-column: 1 / -1;
-}
-
-.reasoning-ablation-card::before {
-  position: absolute;
-  top: 0;
-  left: 18px;
-  width: 52px;
-  height: 4px;
-  border-radius: 0 0 999px 999px;
-  content: '';
-}
-
-.reasoning-orange::before {
-  background: #f39a54;
-}
-
-.reasoning-yellow::before {
-  background: #e9c957;
-}
-
-.reasoning-green::before {
-  background: #85bd74;
-}
-
-.reasoning-purple::before {
-  background: #a58ad0;
-}
-
-.reasoning-card-topline {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.reasoning-ablation-name {
-  color: #282828;
-  font-size: 15px;
-  font-weight: 780;
-}
-
-.reasoning-module-name {
-  color: #8a8a84;
-  font-size: 11px;
-  font-weight: 650;
-}
-
-.reasoning-ablation-card p {
-  margin: 0;
-  color: #555;
-  font-size: 13px;
-  line-height: 1.68;
-  text-align: justify;
+  border-radius: 7px;
+  object-fit: contain;
 }
 
 /* ============================================================
@@ -788,7 +700,7 @@ const limitations = [
 
 .refinement-block {
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
   padding: 20px;
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid #e0e1e4;
@@ -841,174 +753,13 @@ const limitations = [
   text-align: justify;
 }
 
-.comparison-note-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.comparison-note {
-  padding: 14px 15px;
-  border: 1px solid #e4e3df;
-  border-radius: 10px;
-}
-
-.note-negative {
-  background: #fff8f2;
-}
-
-.note-positive {
-  background: #f4faf3;
-}
-
-.comparison-note-label {
-  display: inline-block;
-  margin-bottom: 7px;
-  color: #4a4945;
-  font-size: 12px;
-  font-weight: 750;
-}
-
-.comparison-note p {
-  margin: 0;
-  color: #5c5c58;
-  font-size: 12px;
-  line-height: 1.62;
-}
-
-.optimization-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.optimization-card {
-  position: relative;
-  min-height: 126px;
-  padding: 15px 16px 14px;
-  overflow: hidden;
-  background: #fff;
-  border: 1px solid #e3e2de;
-  border-radius: 10px;
-}
-
-.optimization-card::before {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 4px;
-  height: 100%;
-  content: '';
-}
-
-.opt-orange::before {
-  background: #f39a54;
-}
-
-.opt-yellow::before {
-  background: #e9c957;
-}
-
-.opt-purple::before {
-  background: #a58ad0;
-}
-
-.opt-green::before {
-  background: #85bd74;
-}
-
-.ours-card {
-  background: #f7fbf5;
-}
-
-.optimization-card h4 {
-  margin: 0 0 7px;
-  color: #333;
-  font-size: 13px;
-  font-weight: 760;
-}
-
-.optimization-card p {
-  margin: 0;
-  color: #5b5b57;
-  font-size: 12px;
-  line-height: 1.62;
-}
-
-/* ============================================================
-   Limitations
-   ============================================================ */
-
-.limitations-panel {
-  margin-bottom: 52px;
-}
-
-.limitations-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.limitation-card {
-  position: relative;
-  min-height: 210px;
-  padding: 18px 17px 16px;
-  overflow: hidden;
-  background:
-    linear-gradient(
-      145deg,
-      rgba(255, 255, 255, 0.96),
-      rgba(250, 249, 247, 0.96)
-    );
-  border: 1px solid #e3e1de;
-  border-radius: 12px;
-  box-sizing: border-box;
-}
-
-.limitation-index {
-  display: inline-block;
-  margin-bottom: 15px;
-  color: #aa9a7b;
-  font-size: 11px;
-  font-weight: 850;
-  letter-spacing: 0.1em;
-}
-
-.limitation-card h3 {
-  margin: 0 0 9px;
-  color: #2e2e2c;
-  font-size: 15px;
-  font-weight: 750;
-}
-
-.limitation-card p {
-  margin: 0;
-  color: #595955;
-  font-size: 12.5px;
-  line-height: 1.66;
-  text-align: justify;
-}
-
-.limitation-figure-card {
-  margin-top: 4px;
+.refinement-figure-card {
+  box-shadow: none;
 }
 
 /* ============================================================
    Responsive
    ============================================================ */
-
-@media (max-width: 900px) {
-  .backbone-summary-grid,
-  .limitations-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .backbone-summary-card,
-  .limitation-card {
-    min-height: auto;
-  }
-}
 
 @media (max-width: 767px) {
   .ablation-intro-card {
@@ -1041,43 +792,26 @@ const limitations = [
     white-space: normal;
   }
 
-  .ablation-helper {
+  .result-block-title,
+  .visual-block-title {
     font-size: 14px;
-    text-align: left;
   }
 
-  .reasoning-ablation-grid,
-  .comparison-note-grid,
-  .optimization-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .reasoning-ablation-card:last-child {
-    grid-column: auto;
-  }
-
-  .reasoning-ablation-card p,
-  .refinement-block-header p,
-  .limitation-card p {
-    text-align: left;
+  .ablation-table {
+    font-size: 12px;
   }
 
   .refinement-block {
     padding: 17px 14px;
   }
 
-  .figure-placeholder-card {
+  .refinement-block-header p {
+    text-align: left;
+  }
+
+  .figure-card {
     padding: 5px;
     border-radius: 9px;
-  }
-
-  .figure-placeholder-canvas {
-    min-height: 205px;
-    border-radius: 6px;
-  }
-
-  .large-placeholder {
-    min-height: 230px;
   }
 }
 </style>
