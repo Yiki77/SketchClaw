@@ -1,25 +1,23 @@
 <script lang="ts" setup>
 
-const baseUrl = import.meta.env.BASE_URL
-
 const relationExamples = [
   {
-    image: `${baseUrl}limitation/1.jpg`,
+    image: `./limitation/1.jpg`,
     prompt: 'A woman is watering the plants with a kettle in the garden.',
   },
   {
-    image: `${baseUrl}limitation/2.jpg`,
+    image: `./limitation/2.jpg`,
     prompt: 'A castle on top of a hill.',
   },
 ]
 
 const instanceExamples = [
   {
-    image: `${baseUrl}limitation/3.jpg`,
+    image: `./limitation/3.jpg`,
     label: 'Before',
   },
   {
-    image: `${baseUrl}limitation/4.jpg`,
+    image: `./limitation/4.jpg`,
     label: 'After',
   },
 ]
