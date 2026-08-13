@@ -84,18 +84,16 @@ const pageLoading = reactive({
   error: ''
 })
 
-const baseUrl = import.meta.env.BASE_URL
-const homeUrl = baseUrl
 const manifestUrl =
-  `${baseUrl}carousel/results-manifest.json`
+  `./carousel/results-manifest.json`
 
 const promptsUrl =
-  `${baseUrl}more_results.txt`
+  `./more_results.txt`
 
 const resolveSvgUrl = (file: string) => {
 
   return (
-    `${baseUrl}carousel/${encodeURIComponent(file)}`
+    `./carousel/${encodeURIComponent(file)}`
   )
 
 }
@@ -2734,7 +2732,7 @@ onBeforeUnmount(() => {
 
           <a
             class="back-link"
-            :href="homeUrl"
+            :href="/SketchClaw/"
             aria-label="Back to SketchClaw home page"
           >
             <span aria-hidden="true">←</span>
