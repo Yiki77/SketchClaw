@@ -44,34 +44,46 @@ const instancePrompt =
         :lg="12"
         :xl="12"
       >
-
+<!-- ================================================== -->
+        <!-- Main highlight -->
         <!-- ================================================== -->
-        <!-- Compact heading -->
-        <!-- ================================================== -->
 
-        <div class="limitations-heading">
-
-          <div
-            class="limitations-kicker"
-            aria-hidden="true"
-          >
-            <span class="kicker-bar kicker-orange" />
-            <span class="kicker-bar kicker-yellow" />
-            <span class="kicker-bar kicker-green" />
-            <span class="kicker-bar kicker-purple" />
+        <section class="limitations-highlight">
+          <div class="limitations-kicker" aria-hidden="true">
+            <span class="limitations-kicker-colors">
+              <i class="limitations-kicker-color kicker-orange" />
+              <i class="limitations-kicker-color kicker-yellow" />
+              <i class="limitations-kicker-color kicker-green" />
+              <i class="limitations-kicker-color kicker-purple" />
+            </span>
           </div>
 
-          <h1>
+          <h1 class="limitations-main-title">
             Limitations
           </h1>
 
-          <p>
+          <p class="limitations-main-description">
             SketchClaw still faces challenges in complex relations,
             instance consistency, and computational efficiency.
           </p>
 
-        </div>
+          <div
+            class="limitations-feature-chips"
+            aria-label="Limitation categories"
+          >
+            <span class="limitations-chip chip-orange">
+              Complex Relations
+            </span>
 
+            <span class="limitations-chip chip-green">
+              Instance Consistency
+            </span>
+
+            <span class="limitations-chip chip-purple">
+              Computational Cost
+            </span>
+          </div>
+        </section>
 
         <!-- ================================================== -->
         <!-- One-row limitations -->
@@ -81,7 +93,6 @@ const instancePrompt =
 
 
           <!-- A. Complex Relations -->
-
           <article class="limitation-card card-orange">
 
             <div class="card-heading">
@@ -146,7 +157,6 @@ const instancePrompt =
 
 
           <!-- B. Instance Consistency -->
-
           <article class="limitation-card card-green">
 
             <div class="card-heading">
@@ -211,7 +221,6 @@ const instancePrompt =
 
 
           <!-- C. Computational Cost -->
-
           <article class="limitation-card card-purple">
 
             <div class="card-heading">
@@ -246,18 +255,18 @@ const instancePrompt =
 
 <style scoped>
 
-/* ============================================================
-   Section
-   ============================================================ */
+/* ============================================================*
+*   Section*
+*   ============================================================ */
 
 .limitations-section {
   width: 100%;
 }
 
 
-/* ============================================================
-   Compact heading
-   ============================================================ */
+/* ============================================================*
+*   Compact heading*
+*   ============================================================ */
 
 .limitations-heading {
   margin-bottom: 18px;
@@ -309,9 +318,136 @@ const instancePrompt =
 }
 
 
+/* ============================================================*
+*   Three-column grid*
+*   ============================================================ */
+
+
 /* ============================================================
-   Three-column grid
+   Main highlight card
    ============================================================ */
+
+.limitations-highlight {
+  position: relative;
+  width: 100%;
+  margin: 0 0 30px;
+  padding: 27px 30px 24px;
+  overflow: hidden;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 249, 238, 0.97),
+      rgba(248, 252, 244, 0.97) 48%,
+      rgba(249, 246, 255, 0.97)
+    );
+  border: 1px solid #e3e0db;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(35, 35, 35, 0.055);
+  box-sizing: border-box;
+}
+
+.limitations-highlight::after {
+  position: absolute;
+  right: -72px;
+  bottom: -98px;
+  width: 225px;
+  height: 225px;
+  background:
+    radial-gradient(
+      circle,
+      rgba(165, 138, 208, 0.13),
+      rgba(165, 138, 208, 0)
+    );
+  border-radius: 50%;
+  pointer-events: none;
+  content: '';
+}
+
+.limitations-kicker {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.limitations-kicker-colors {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.limitations-kicker-color {
+  display: block;
+  width: 29px;
+  height: 5px;
+  border-radius: 999px;
+}
+
+.limitations-main-title {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 8px;
+  color: #222;
+  font-size: 32px;
+  font-weight: 750;
+  line-height: 1.3;
+  text-align: left;
+}
+
+.limitations-main-description {
+  position: relative;
+  z-index: 1;
+  max-width: 850px;
+  margin: 0 0 18px;
+  color: #333;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.7;
+  text-align: justify;
+}
+
+.limitations-feature-chips {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  width: 100%;
+}
+
+.limitations-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 5px 11px;
+  color: #303030;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.2;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+.chip-orange {
+  background: #fff0e5;
+  border-color: #f3b17f;
+}
+
+.chip-green {
+  background: #eaf7ed;
+  border-color: #9dccaa;
+}
+
+.chip-purple {
+  background: #f1ecfb;
+  border-color: #b7a2df;
+}
 
 .limitations-grid {
   display: grid;
@@ -323,9 +459,9 @@ const instancePrompt =
 }
 
 
-/* ============================================================
-   Cards
-   ============================================================ */
+/* ============================================================*
+*   Cards*
+*   ============================================================ */
 
 .limitation-card {
   display: flex;
@@ -400,9 +536,9 @@ const instancePrompt =
 }
 
 
-/* ============================================================
-   Image pairs
-   ============================================================ */
+/* ============================================================*
+*   Image pairs*
+*   ============================================================ */
 
 .paired-images {
   display: grid;
@@ -465,9 +601,9 @@ const instancePrompt =
 }
 
 
-/* ============================================================
-   Computational cost
-   ============================================================ */
+/* ============================================================*
+*   Computational cost*
+*   ============================================================ */
 
 .cost-visual {
   display: flex;
@@ -521,9 +657,9 @@ const instancePrompt =
 }
 
 
-/* ============================================================
-   Tooltip
-   ============================================================ */
+/* ============================================================*
+*   Tooltip*
+*   ============================================================ */
 
 :global(.limitation-prompt-tooltip) {
   max-width: 360px;
@@ -535,9 +671,9 @@ const instancePrompt =
 }
 
 
-/* ============================================================
-   Responsive
-   ============================================================ */
+/* ============================================================*
+*   Responsive*
+*   ============================================================ */
 
 @media (max-width: 991px) {
 
@@ -557,12 +693,21 @@ const instancePrompt =
 
 @media (max-width: 767px) {
 
-  .limitations-heading h1 {
+  .limitations-highlight {
+    padding: 23px 18px 21px;
+  }
+
+  .limitations-main-title {
     font-size: 27px;
   }
 
-  .limitations-heading p {
-    font-size: 15px;
+  .limitations-main-description {
+    font-size: 17px;
+    text-align: left;
+  }
+
+  .limitations-feature-chips {
+    justify-content: flex-start;
   }
 
 }
