@@ -2,8 +2,6 @@
 import { computed, ref } from 'vue'
 import { ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
 
-const baseUrl = import.meta.env.BASE_URL
-
 interface ComparisonImage {
   label: string
   src: string
@@ -158,7 +156,7 @@ const backboneGroups: ComparisonGroup[] = backbonePrompts.map((prompt, index) =>
   prompt,
   images: backboneMethods.map((method) => ({
     label: method.label,
-    src: `${baseUrl}backbones/${index + 1}-${method.key}.jpg`,
+    src: `./backbones/${index + 1}-${method.key}.jpg`,
   })),
 }))
 
@@ -187,7 +185,7 @@ const reasoningGroups: ComparisonGroup[] = reasoningPrompts.map((prompt, index) 
   prompt,
   images: reasoningMethods.map((method) => ({
     label: method.label,
-    src: `${baseUrl}reasoning/${index + 1}-${method.key}.jpg`,
+    src: `./reasoning/${index + 1}-${method.key}.jpg`,
   })),
 }))
 
@@ -208,19 +206,19 @@ const resamplingGroups: ComparisonGroup[] = resamplingPrompts.map((prompt, index
   images: [
     {
       label: 'Point-based Resampling',
-      src: `${baseUrl}resampling/${index + 1}-point.jpg`,
+      src: `./resampling/${index + 1}-point.jpg`,
     },
     {
       label: 'Point-based Result',
-      src: `${baseUrl}resampling/${index + 1}-point-result.jpg`,
+      src: `./resampling/${index + 1}-point-result.jpg`,
     },
     {
       label: 'Contour Resampling',
-      src: `${baseUrl}resampling/${index + 1}-curve.jpg`,
+      src: `./resampling/${index + 1}-curve.jpg`,
     },
     {
       label: 'Contour Result',
-      src: `${baseUrl}resampling/${index + 1}-curve-result.jpg`,
+      src: `./resampling/${index + 1}-curve-result.jpg`,
     },
   ],
 }))
@@ -242,23 +240,23 @@ const optimizationGroups: ComparisonGroup[] = optimizationPrompts.map((prompt, i
   images: [
     {
       label: 'Draft',
-      src: `${baseUrl}optimization/${index + 1}-draft.jpg`,
+      src: `./optimization/${index + 1}-draft.jpg`,
     },
     {
       label: 'SketchClaw',
-      src: `${baseUrl}optimization/${index + 1}-sketchclaw.jpg`,
+      src: `./optimization/${index + 1}-sketchclaw.jpg`,
     },
     {
       label: 'w/o Local',
-      src: `${baseUrl}optimization/${index + 1}-local.jpg`,
+      src: `./optimization/${index + 1}-local.jpg`,
     },
     {
       label: 'w/o Global',
-      src: `${baseUrl}optimization/${index + 1}-global.jpg`,
+      src: `./optimization/${index + 1}-global.jpg`,
     },
     {
       label: 'w/o Progressive',
-      src: `${baseUrl}optimization/${index + 1}-progressive.jpg`,
+      src: `./optimization/${index + 1}-progressive.jpg`,
     },
   ],
 }))
