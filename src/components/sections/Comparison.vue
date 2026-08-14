@@ -193,65 +193,65 @@ const geminiData: ComparisonRow[] = [
 
   {
     model: 'VectorFusion',
-    semanticAlignment: '0.310',
-    spatialComposition: '0.145',
+    semanticAlignment: '0.4033',
+    spatialComposition: '0.0967',
     objectCompleteness: '0.220',
-    visualAesthetics: '0.270',
-    sizeConsistency: '0.240'
+    visualAesthetics: '0.350',
+    sizeConsistency: '0.380'
   },
 
   {
     model: 'SVGDreamer',
-    semanticAlignment: '0.700',
-    spatialComposition: '0.580',
-    objectCompleteness: '0.650',
-    visualAesthetics: '0.680',
-    sizeConsistency: '0.660'
+    semanticAlignment: '0.6300',
+    spatialComposition: '0.3833',
+    objectCompleteness: '0.4900',
+    visualAesthetics: '0.6233',
+    sizeConsistency: '0.7667'
   },
 
   {
     model: 'DiffSketcher',
-    semanticAlignment: '0.520',
-    spatialComposition: '0.350',
-    objectCompleteness: '0.390',
-    visualAesthetics: '0.540',
-    sizeConsistency: '0.430'
+    semanticAlignment: '0.4717',
+    spatialComposition: '0.1900',
+    objectCompleteness: '0.1900',
+    visualAesthetics: '0.5567',
+    sizeConsistency: '0.5400'
   },
 
   {
     model: 'SketchAgent',
-    semanticAlignment: '0.720',
-    spatialComposition: '0.620',
-    objectCompleteness: '0.620',
-    visualAesthetics: '0.710',
-    sizeConsistency: '0.640'
+    semanticAlignment: '0.7867',
+    spatialComposition: '0.480',
+    objectCompleteness: '0.500',
+    visualAesthetics: '0.7733',
+    sizeConsistency: '0.8033'
   },
 
   {
     model: 'GPT-5.5',
-    semanticAlignment: '0.900',
+    semanticAlignment: '0.9537',
     spatialComposition: '0.780',
-    objectCompleteness: '0.800',
-    visualAesthetics: '0.830',
-    sizeConsistency: '0.770'
+    objectCompleteness: '0.8333',
+    visualAesthetics: '0.730',
+    sizeConsistency: '0.9333'
   },
 
   {
     model: 'SketchClaw',
-    semanticAlignment: '0.930',
-    spatialComposition: '0.850',
-    objectCompleteness: '0.860',
-    visualAesthetics: '0.870',
-    sizeConsistency: '0.820'
+    semanticAlignment: '0.9593',
+    spatialComposition: '0.7733',
+    objectCompleteness: '0.7967',
+    visualAesthetics: '0.840',
+    sizeConsistency: '0.8967'
   },
 
   {
     model: 'SketchClaw(refine)',
-    semanticAlignment: '0.930',
-    spatialComposition: '0.850',
-    objectCompleteness: '0.860',
-    visualAesthetics: '0.870',
-    sizeConsistency: '0.820'
+    semanticAlignment: '0.9667',
+    spatialComposition: '0.7367',
+    objectCompleteness: '0.8633',
+    visualAesthetics: '0.9067',
+    sizeConsistency: '0.950'
   }
 
 ]
@@ -265,65 +265,65 @@ const gptData: ComparisonRow[] = [
 
   {
     model: 'VectorFusion',
-    semanticAlignment: '0.310',
-    spatialComposition: '0.145',
-    objectCompleteness: '0.220',
-    visualAesthetics: '0.270',
-    sizeConsistency: '0.240'
+    semanticAlignment: '0.450',
+    spatialComposition: '0.250',
+    objectCompleteness: '0.350',
+    visualAesthetics: '0.400',
+    sizeConsistency: '0.400'
   },
 
   {
     model: 'SVGDreamer',
-    semanticAlignment: '0.700',
-    spatialComposition: '0.580',
-    objectCompleteness: '0.650',
-    visualAesthetics: '0.680',
-    sizeConsistency: '0.660'
+    semanticAlignment: '0.7057',
+    spatialComposition: '0.5753',
+    objectCompleteness: '0.6393',
+    visualAesthetics: '0.6287',
+    sizeConsistency: '0.656'
   },
 
   {
     model: 'DiffSketcher',
-    semanticAlignment: '0.520',
-    spatialComposition: '0.350',
-    objectCompleteness: '0.390',
-    visualAesthetics: '0.540',
-    sizeConsistency: '0.430'
+    semanticAlignment: '0.578',
+    spatialComposition: '0.4193',
+    objectCompleteness: '0.416',
+    visualAesthetics: '0.5293',
+    sizeConsistency: '0.5313'
   },
 
   {
     model: 'SketchAgent',
-    semanticAlignment: '0.720',
-    spatialComposition: '0.620',
-    objectCompleteness: '0.620',
-    visualAesthetics: '0.710',
-    sizeConsistency: '0.640'
+    semanticAlignment: '0.7097',
+    spatialComposition: '0.6523',
+    objectCompleteness: '0.5877',
+    visualAesthetics: '0.687',
+    sizeConsistency: '0.6577'
   },
 
   {
     model: 'GPT-5.5',
-    semanticAlignment: '0.900',
-    spatialComposition: '0.780',
-    objectCompleteness: '0.800',
-    visualAesthetics: '0.830',
-    sizeConsistency: '0.770'
+    semanticAlignment: '0.8573',
+    spatialComposition: '0.6497',
+    objectCompleteness: '0.7733',
+    visualAesthetics: '0.8303',
+    sizeConsistency: '0.785'
   },
 
   {
     model: 'SketchClaw',
-    semanticAlignment: '0.930',
-    spatialComposition: '0.850',
-    objectCompleteness: '0.860',
-    visualAesthetics: '0.870',
-    sizeConsistency: '0.820'
+    semanticAlignment: '0.8957',
+    spatialComposition: '0.7617',
+    objectCompleteness: '0.757',
+    visualAesthetics: '0.8147',
+    sizeConsistency: '0.7363'
   },
 
   {
     model: 'SketchClaw(refine)',
-    semanticAlignment: '0.930',
-    spatialComposition: '0.850',
-    objectCompleteness: '0.860',
-    visualAesthetics: '0.870',
-    sizeConsistency: '0.820'
+    semanticAlignment: '0.9017',
+    spatialComposition: '0.7807',
+    objectCompleteness: '0.8023',
+    visualAesthetics: '0.8563',
+    sizeConsistency: '0.7843'
   }
 
 ]
