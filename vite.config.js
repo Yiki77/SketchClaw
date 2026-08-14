@@ -27,7 +27,7 @@ export default defineConfig({
 
   // GitHub Pages:
   // https://xxx.github.io/SketchClaw/
-  base: '/SketchClaw/',
+  base: '/SketchClaw',
 
   resolve: {
     alias: {
