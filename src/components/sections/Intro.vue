@@ -3028,7 +3028,7 @@ const loadReasoningProcess = async (
   try {
 
     const operationsPath =
-      `${item.reasoningFolder}/operations.txt`
+      `./${item.reasoningFolder}/operations.txt`
 
     const response =
       await fetch(operationsPath)
@@ -3237,7 +3237,7 @@ const loadRefinementProcess = async (
     ) {
 
       const frameUrl =
-        `${item.refineFolder}/${frameIndex}.jpg`
+        `./${item.refineFolder}/${frameIndex}.jpg`
 
       const frameExists =
         await preloadIntroImage(frameUrl)
