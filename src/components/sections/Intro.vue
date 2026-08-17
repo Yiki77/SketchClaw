@@ -128,19 +128,19 @@ const galleryConfigs: GalleryConfig[] = [
       'A chef in the kitchen.',
 
     svg:
-      '/carousel/1-chef.svg',
+      './carousel/1-chef.svg',
 
     draft:
-      '/carousel/1-chef_draft.jpg',
+      './carousel/1-chef_draft.jpg',
 
     conceptManifest:
-      '/concept/1/manifest.json',
+      './concept/1/manifest.json',
 
     reasoningFolder:
-      '/layout_process/1',
+      './layout_process/1',
 
     refineFolder:
-      '/refine/1'
+      './refine/1'
   },
 
 
@@ -153,19 +153,19 @@ const galleryConfigs: GalleryConfig[] = [
       'A staggered city skyline of spires, domes, and clock towers; street trees and lampposts line the foreground, and flocks of birds fly in the sky.',
 
     svg:
-      '/carousel/2-city.svg',
+      './carousel/2-city.svg',
 
     draft:
-      '/carousel/2-city_draft.jpg',
+      './carousel/2-city_draft.jpg',
 
     conceptManifest:
-      '/concept/2/manifest.json',
+      './concept/2/manifest.json',
 
     reasoningFolder:
-      '/layout_process/2',
+      './layout_process/2',
 
     refineFolder:
-      '/refine/2'
+      './refine/2'
   },
 
 
@@ -178,19 +178,19 @@ const galleryConfigs: GalleryConfig[] = [
       'Four ducks are swimming in the pool.',
 
     svg:
-      '/carousel/3-ducks.svg',
+      './carousel/3-ducks.svg',
 
     draft:
-      '/carousel/3-ducks_draft.jpg',
+      './carousel/3-ducks_draft.jpg',
 
     conceptManifest:
-      '/concept/3/manifest.json',
+      './concept/3/manifest.json',
 
     reasoningFolder:
-      '/layout_process/3',
+      './layout_process/3',
 
     refineFolder:
-      '/refine/3'
+      './refine/3'
   }
 
 ]
