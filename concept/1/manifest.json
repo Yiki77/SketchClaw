@@ -1,0 +1,29 @@
+{
+  "assets": [
+    {
+      "id": "floor",
+      "name": "Floor",
+      "file": "1-floor.svg"
+    },
+    {
+      "id": "table",
+      "name": "Table",
+      "file": "2-table.svg"
+    },
+    {
+      "id": "stove",
+      "name": "Stove",
+      "file": "3-stove.svg"
+    },
+    {
+      "id": "pot",
+      "name": "Pot",
+      "file": "4-pot.svg"
+    },
+    {
+      "id": "chef",
+      "name": "Chef",
+      "file": "5-chef.svg"
+    }
+  ]
+}

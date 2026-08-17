@@ -1,0 +1,29 @@
+{
+  "assets": [
+    {
+      "id": "lack",
+      "name": "Lack",
+      "file": "1-lack.svg"
+    },
+    {
+      "id": "duck_1",
+      "name": "Duck 1",
+      "file": "2-duck_1.svg"
+    },
+    {
+      "id": "duck_2",
+      "name": "Duck 2",
+      "file": "3-duck_2.svg"
+    },
+    {
+      "id": "duck_3",
+      "name": "Duck 3",
+      "file": "4-duck_3.svg"
+    },
+    {
+      "id": "duck_4",
+      "name": "Duck 4",
+      "file": "5-duck_4.svg"
+    }
+  ]
+}

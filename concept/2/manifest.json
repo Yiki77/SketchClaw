@@ -1,0 +1,79 @@
+{
+  "assets": [
+    {
+      "id": "tower_1",
+      "name": "Tower 1",
+      "file": "1-spire_tower_1.svg"
+    },
+    {
+      "id": "tower_2",
+      "name": "Tower 2",
+      "file": "2-domed_building_1.svg"
+    },
+    {
+      "id": "tower_3",
+      "name": "Tower 3",
+      "file": "3-clock_tower_1.svg"
+    },
+    {
+      "id": "tower_4",
+      "name": "Tower 4",
+      "file": "4-spire_tower_2.svg"
+    },
+    {
+      "id": "tower_5",
+      "name": "Tower 5",
+      "file": "5-domed_building_2.svg"
+    },
+    {
+      "id": "bird_1",
+      "name": "Bird 1",
+      "file": "6-bird_1.svg"
+    },
+    {
+      "id": "bird_2",
+      "name": "Bird 2",
+      "file": "7-bird_1.svg"
+    },
+    {
+      "id": "bird_3",
+      "name": "Bird 3",
+      "file": "8-bird_3.svg"
+    },
+    {
+      "id": "street",
+      "name": "Street",
+      "file": "9-street.svg"
+    },
+    {
+      "id": "tree_1",
+      "name": "Tree 1",
+      "file": "10-tree_1.svg"
+    },
+    {
+      "id": "lamppost_1",
+      "name": "Lamppost 1",
+      "file": "11-lamppost_1.svg"
+    },
+    {
+      "id": "tree_2",
+      "name": "Tree 2",
+      "file": "12-tree_2.svg"
+    },
+    {
+      "id": "lamppost_2",
+      "name": "Lamppost 2",
+      "file": "13-lamppost_2.svg"
+    },
+    {
+      "id": "tree_3",
+      "name": "Tree 3",
+      "file": "14-tree_3.svg"
+    },
+    {
+      "id": "lamppost_3",
+      "name": "Lamppost 3",
+      "file": "15-lamppost_3.svg"
+    }
+  ]
+}
