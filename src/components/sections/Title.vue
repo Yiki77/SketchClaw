@@ -9,7 +9,7 @@ const projectName = 'SketchClaw'
 
 // 论文标题
 const title =
-  'Automatic Multi-Concept Scene Sketching with Coding Agents'
+  'Agentic Multi-Concept Scene Sketching'
 
 // 标题颜色
 const titleColor = '#3f3f3f'
