@@ -46,7 +46,7 @@ const buttons = [
   {
     disabled: false,
     name: 'Paper',
-    link: './paper/_SketchClaw.pdf',
+    link: './paper/_AAAI_27__SketchClaw.pdf',
     component: Document,
   },
   {
